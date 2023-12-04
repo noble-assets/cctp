@@ -16,6 +16,7 @@
 package types
 
 import (
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -57,11 +58,11 @@ func (msg *MsgUnlinkTokenPair) GetSignBytes() []byte {
 func (msg *MsgUnlinkTokenPair) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.From)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid from address: %s", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid from address: %s", err)
 	}
 
 	if len(msg.RemoteToken) != 32 {
-		return sdkerrors.Wrapf(ErrInvalidRemoteToken, "must be a byte32 array: %s", err)
+		return errors.Wrapf(ErrInvalidRemoteToken, "must be a byte32 array: %s", err)
 	}
 
 	return nil

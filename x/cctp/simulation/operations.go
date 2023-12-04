@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package simulation
+package simulation
 
 import (
 	"crypto/elliptic"
@@ -25,7 +25,6 @@ import (
 	"github.com/circlefin/noble-cctp/x/cctp/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simTypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
@@ -125,7 +124,7 @@ func SimulateAcceptOwner(accountKeeper types.AccountKeeper, keeper *keeper.Keepe
 		updateTx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           updateMsg,
 			MsgType:       updateMsg.Type(),
@@ -137,7 +136,7 @@ func SimulateAcceptOwner(accountKeeper types.AccountKeeper, keeper *keeper.Keepe
 		acceptTx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           acceptMsg,
 			MsgType:       acceptMsg.Type(),
@@ -174,7 +173,7 @@ func SimulateAddRemoteTokenMessenger(accountKeeper types.AccountKeeper, keeper *
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -225,7 +224,7 @@ func SimulateDepositForBurn(accountKeeper types.AccountKeeper, bankKeeper types.
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           burn,
 			MsgType:       burn.Type(),
@@ -279,7 +278,7 @@ func SimulateDepositForBurnWithCaller(accountKeeper types.AccountKeeper, bankKee
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -318,7 +317,7 @@ func SimulateDisableAttester(accountKeeper types.AccountKeeper, keeper *keeper.K
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -352,7 +351,7 @@ func SimulateEnableAttester(accountKeeper types.AccountKeeper, keeper *keeper.Ke
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -387,7 +386,7 @@ func SimulateLinkTokenPair(accountKeeper types.AccountKeeper, keeper *keeper.Kee
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -429,7 +428,7 @@ func SimulatePausingOfBurningAndMinting(accountKeeper types.AccountKeeper, keepe
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       sdk.MsgTypeURL(msg),
@@ -471,7 +470,7 @@ func SimulatePausingOfSendingAndReceiving(accountKeeper types.AccountKeeper, kee
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       sdk.MsgTypeURL(msg),
@@ -535,7 +534,7 @@ func SimulateReceiveMessage(accountKeeper types.AccountKeeper, keeper *keeper.Ke
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       sdk.MsgTypeURL(msg),
@@ -574,7 +573,7 @@ func SimulateRemoveRemoteTokenMessenger(accountKeeper types.AccountKeeper, keepe
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -672,7 +671,7 @@ func SimulateReplaceDepositForBurn(accountKeeper types.AccountKeeper, bankKeeper
 		sendTx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           sendMsg,
 			MsgType:       sendMsg.Type(),
@@ -684,7 +683,7 @@ func SimulateReplaceDepositForBurn(accountKeeper types.AccountKeeper, bankKeeper
 		replaceTx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           replaceMsg,
 			MsgType:       replaceMsg.Type(),
@@ -766,7 +765,7 @@ func SimulateReplaceMessage(accountKeeper types.AccountKeeper, keeper *keeper.Ke
 		sendTx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           sendMsg,
 			MsgType:       sendMsg.Type(),
@@ -778,7 +777,7 @@ func SimulateReplaceMessage(accountKeeper types.AccountKeeper, keeper *keeper.Ke
 		replaceTx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           replaceMsg,
 			MsgType:       replaceMsg.Type(),
@@ -822,7 +821,7 @@ func SimulateSendMessage(accountKeeper types.AccountKeeper, keeper *keeper.Keepe
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -866,7 +865,7 @@ func SimulateSendMessageWithCaller(accountKeeper types.AccountKeeper, keeper *ke
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -905,7 +904,7 @@ func SimulateUnlinkTokenPair(accountKeeper types.AccountKeeper, keeper *keeper.K
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -936,7 +935,7 @@ func SimulateUpdateOwner(accountKeeper types.AccountKeeper, keeper *keeper.Keepe
 		updateTx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           updateMsg,
 			MsgType:       updateMsg.Type(),
@@ -967,7 +966,7 @@ func SimulateUpdateAttesterManager(accountKeeper types.AccountKeeper, keeper *ke
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -998,7 +997,7 @@ func SimulateUpdateTokenController(accountKeeper types.AccountKeeper, keeper *ke
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -1029,7 +1028,7 @@ func SimulateUpdatePauser(accountKeeper types.AccountKeeper, keeper *keeper.Keep
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -1060,7 +1059,7 @@ func SimulateUpdateMaxMessageBodySize(accountKeeper types.AccountKeeper, keeper 
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -1090,7 +1089,7 @@ func SimulateSetMaxBurnAmountPerMessage(accountKeeper types.AccountKeeper, keepe
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),
@@ -1131,7 +1130,7 @@ func SimulateUpdateSignatureThreshold(accountKeeper types.AccountKeeper, keeper 
 		tx := simulation.OperationInput{
 			R:             r,
 			App:           app,
-			TxGen:         params.MakeTestEncodingConfig().TxConfig,
+			TxGen:         nil, // TODO
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       msg.Type(),

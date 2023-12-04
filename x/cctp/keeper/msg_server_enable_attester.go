@@ -18,10 +18,9 @@ package keeper
 import (
 	"context"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
+	"cosmossdk.io/errors"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func (k msgServer) EnableAttester(goCtx context.Context, msg *types.MsgEnableAttester) (*types.MsgEnableAttesterResponse, error) {
@@ -29,12 +28,12 @@ func (k msgServer) EnableAttester(goCtx context.Context, msg *types.MsgEnableAtt
 
 	attesterManager := k.GetAttesterManager(ctx)
 	if attesterManager != msg.From {
-		return nil, sdkerrors.Wrapf(types.ErrUnauthorized, "this message sender cannot enable attesters")
+		return nil, errors.Wrapf(types.ErrUnauthorized, "this message sender cannot enable attesters")
 	}
 
 	_, found := k.GetAttester(ctx, msg.Attester)
 	if found {
-		return nil, sdkerrors.Wrapf(types.ErrAttesterAlreadyFound, "this attester already exists in the store")
+		return nil, errors.Wrapf(types.ErrAttesterAlreadyFound, "this attester already exists in the store")
 	}
 
 	newAttester := types.Attester{

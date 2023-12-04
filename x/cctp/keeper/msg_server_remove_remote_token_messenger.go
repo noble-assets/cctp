@@ -18,9 +18,9 @@ package keeper
 import (
 	"context"
 
+	"cosmossdk.io/errors"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 func (k msgServer) RemoveRemoteTokenMessenger(goCtx context.Context, msg *types.MsgRemoveRemoteTokenMessenger) (*types.MsgRemoveRemoteTokenMessengerResponse, error) {
@@ -28,12 +28,12 @@ func (k msgServer) RemoveRemoteTokenMessenger(goCtx context.Context, msg *types.
 
 	owner := k.GetOwner(ctx)
 	if owner != msg.From {
-		return nil, sdkerrors.Wrapf(types.ErrUnauthorized, "this message sender cannot remove remote token messengers")
+		return nil, errors.Wrapf(types.ErrUnauthorized, "this message sender cannot remove remote token messengers")
 	}
 
 	existingRemoteTokenMessenger, found := k.GetRemoteTokenMessenger(ctx, msg.DomainId)
 	if !found {
-		return nil, sdkerrors.Wrapf(types.ErrRemoteTokenMessengerNotFound, "no remote token messenger was found for this domain")
+		return nil, errors.Wrapf(types.ErrRemoteTokenMessengerNotFound, "no remote token messenger was found for this domain")
 	}
 
 	k.DeleteRemoteTokenMessenger(ctx, msg.DomainId)

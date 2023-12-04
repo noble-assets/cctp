@@ -18,20 +18,18 @@ package keeper
 import (
 	"testing"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
+	"cosmossdk.io/errors"
 	"github.com/circlefin/noble-fiattokenfactory/x/fiattokenfactory/keeper"
 	"github.com/circlefin/noble-fiattokenfactory/x/fiattokenfactory/types"
+	tmdb "github.com/cometbft/cometbft-db"
+	"github.com/cometbft/cometbft/libs/log"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/store"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/libs/log"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmdb "github.com/tendermint/tm-db"
 )
 
 func FiatTokenfactoryKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
@@ -45,23 +43,13 @@ func FiatTokenfactoryKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 	registry := codectypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(registry)
 
-	paramsSubspace := typesparams.NewSubspace(cdc,
-		codec.NewLegacyAmino(),
-		storeKey,
-		nil,
-		"TokenfactoryParams",
-	)
 	k := keeper.NewKeeper(
 		cdc,
 		storeKey,
-		paramsSubspace,
 		MockBankKeeper{},
 	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
-
-	// Initialize params
-	k.SetParams(ctx, types.DefaultParams())
 
 	return k, ctx
 }
@@ -91,16 +79,9 @@ func ErrFiatTokenfactoryKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 	registry := codectypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(registry)
 
-	paramsSubspace := typesparams.NewSubspace(cdc,
-		codec.NewLegacyAmino(),
-		storeKey,
-		nil,
-		"TokenfactoryParams",
-	)
 	k := keeper.NewKeeper(
 		cdc,
 		storeKey,
-		paramsSubspace,
 		MockBankKeeper{},
 	)
 
@@ -116,7 +97,7 @@ func ErrFiatTokenfactoryKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 type MockErrFiatTokenfactoryKeeper struct{}
 
 func (k MockErrFiatTokenfactoryKeeper) Mint(ctx sdk.Context, msg *types.MsgMint) (*types.MsgMintResponse, error) {
-	return nil, sdkerrors.Wrap(types.ErrBurn, "error calling mint")
+	return nil, errors.Wrap(types.ErrBurn, "error calling mint")
 }
 
 func (k MockErrFiatTokenfactoryKeeper) GetMintingDenom(ctx sdk.Context) (val types.MintingDenom) {

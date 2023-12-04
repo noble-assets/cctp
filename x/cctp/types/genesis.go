@@ -18,6 +18,7 @@ package types
 import (
 	"fmt"
 
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -47,25 +48,25 @@ func DefaultGenesis() *GenesisState {
 func (gs GenesisState) Validate() error {
 	if gs.Owner != "" {
 		if _, err := sdk.AccAddressFromBech32(gs.Owner); err != nil {
-			return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid owner address (%s)", err)
+			return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid owner address (%s)", err)
 		}
 	}
 
 	if gs.AttesterManager != "" {
 		if _, err := sdk.AccAddressFromBech32(gs.AttesterManager); err != nil {
-			return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid attester manager address (%s)", err)
+			return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid attester manager address (%s)", err)
 		}
 	}
 
 	if gs.Pauser != "" {
 		if _, err := sdk.AccAddressFromBech32(gs.Pauser); err != nil {
-			return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid pauser address (%s)", err)
+			return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid pauser address (%s)", err)
 		}
 	}
 
 	if gs.TokenController != "" {
 		if _, err := sdk.AccAddressFromBech32(gs.TokenController); err != nil {
-			return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid token controller address (%s)", err)
+			return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid token controller address (%s)", err)
 		}
 	}
 

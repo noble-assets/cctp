@@ -30,12 +30,12 @@ func (am AppModule) GenerateGenesisState(input *module.SimulationState) {
 	simulation.GenerateGenesisState(input)
 }
 
-func (am AppModule) ProposalContents(_ module.SimulationState) []simTypes.WeightedProposalContent {
+func (am AppModule) ProposalContents(_ module.SimulationState) []simTypes.WeightedProposalMsg {
 	// We don't have any governance proposals in the CCTP module.
 	return nil
 }
 
-func (am AppModule) RandomizedParams(_ *rand.Rand) []simTypes.ParamChange {
+func (am AppModule) RandomizedParams(_ *rand.Rand) []simTypes.LegacyParamChange {
 	// We don't have any parameters in the CCTP module.
 	return nil
 }

@@ -16,6 +16,7 @@
 package types
 
 import (
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/common"
@@ -56,12 +57,12 @@ func (msg *MsgDisableAttester) GetSignBytes() []byte {
 func (msg *MsgDisableAttester) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.From)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid from address (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid from address (%s)", err)
 	}
 
 	attester := common.FromHex(msg.Attester)
 	if len(attester) == 0 {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid attester")
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid attester")
 	}
 
 	return nil

@@ -22,7 +22,8 @@ lint:
 ###                                Protobuf                                 ###
 ###############################################################################
 
-BUF_VERSION=1.27.1
+BUF_VERSION=1.28.1
+BUILDER_VERSION=0.14.0
 
 proto-all: proto-format proto-lint proto-gen
 
@@ -35,7 +36,7 @@ proto-format:
 proto-gen:
 	@echo "🤖 Generating code from protobuf..."
 	@docker run --rm --volume "$(PWD)":/workspace --workdir /workspace \
-		noble-cctp-proto sh ./proto/generate.sh
+		ghcr.io/cosmos/proto-builder:$(BUILDER_VERSION) sh ./proto/generate.sh
 	@echo "✅ Completed code generation!"
 
 proto-lint:
@@ -43,11 +44,6 @@ proto-lint:
 	@docker run --rm --volume "$(PWD)":/workspace --workdir /workspace \
 		bufbuild/buf:$(BUF_VERSION) lint
 	@echo "✅ Completed protobuf linting!"
-
-proto-setup:
-	@echo "🤖 Setting up protobuf environment..."
-	@docker build --rm --tag noble-cctp-proto:latest --file proto/Dockerfile .
-	@echo "✅ Setup protobuf environment!"
 
 ###############################################################################
 ###                                 Testing                                 ###

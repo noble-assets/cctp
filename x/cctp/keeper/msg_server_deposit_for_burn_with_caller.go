@@ -19,9 +19,9 @@ import (
 	"bytes"
 	"context"
 
+	"cosmossdk.io/errors"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 func (k msgServer) DepositForBurnWithCaller(goCtx context.Context, msg *types.MsgDepositForBurnWithCaller) (*types.MsgDepositForBurnWithCallerResponse, error) {
@@ -30,7 +30,7 @@ func (k msgServer) DepositForBurnWithCaller(goCtx context.Context, msg *types.Ms
 	// Destination caller must be nonzero. To allow any destination caller, use DepositForBurn().
 	emptyByteArr := make([]byte, types.DestinationCallerLen)
 	if len(msg.DestinationCaller) == 0 || bytes.Equal(msg.DestinationCaller, emptyByteArr) {
-		return nil, sdkerrors.Wrap(types.ErrInvalidDestinationCaller, "invalid destination caller")
+		return nil, errors.Wrap(types.ErrInvalidDestinationCaller, "invalid destination caller")
 	}
 
 	nonce, err := k.depositForBurn(

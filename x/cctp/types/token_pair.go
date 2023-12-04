@@ -19,18 +19,18 @@ import (
 	"encoding/hex"
 	"strings"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"cosmossdk.io/errors"
 )
 
 // RemoteTokenPadded returns the remote token as a byte array, padded to 32 bytes
 func RemoteTokenPadded(remoteTokenHex string) ([]byte, error) {
 	remoteToken, err := hex.DecodeString(strings.TrimPrefix(remoteTokenHex, "0x"))
 	if err != nil {
-		return nil, sdkerrors.Wrap(ErrInvalidRemoteToken, "must be hex string")
+		return nil, errors.Wrap(ErrInvalidRemoteToken, "must be hex string")
 	}
 
 	if len(remoteToken) > BurnTokenLen {
-		return nil, sdkerrors.Wrapf(ErrInvalidRemoteToken, "must be less than %d bytes", BurnTokenLen)
+		return nil, errors.Wrapf(ErrInvalidRemoteToken, "must be less than %d bytes", BurnTokenLen)
 	}
 
 	remoteTokenPadded := make([]byte, BurnTokenLen)

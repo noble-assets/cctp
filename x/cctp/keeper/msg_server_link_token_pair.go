@@ -19,10 +19,9 @@ import (
 	"context"
 	"strings"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
+	"cosmossdk.io/errors"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func (k msgServer) LinkTokenPair(goCtx context.Context, msg *types.MsgLinkTokenPair) (*types.MsgLinkTokenPairResponse, error) {
@@ -30,13 +29,13 @@ func (k msgServer) LinkTokenPair(goCtx context.Context, msg *types.MsgLinkTokenP
 
 	tokenController := k.GetTokenController(ctx)
 	if tokenController != msg.From {
-		return nil, sdkerrors.Wrapf(types.ErrUnauthorized, "this message sender cannot link token pairs")
+		return nil, errors.Wrapf(types.ErrUnauthorized, "this message sender cannot link token pairs")
 	}
 
 	// check whether there already exists a mapping for this remote domain/token
 	_, found := k.GetTokenPair(ctx, msg.RemoteDomain, msg.RemoteToken)
 	if found {
-		return nil, sdkerrors.Wrapf(
+		return nil, errors.Wrapf(
 			types.ErrTokenPairAlreadyFound,
 			"Local token for this remote domain + remote token mapping already exists in store")
 	}

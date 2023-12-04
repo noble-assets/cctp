@@ -18,6 +18,7 @@ package keeper
 import (
 	"errors"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
@@ -51,7 +52,7 @@ func (MockBankKeeper) GetDenomMetaData(ctx sdk.Context, denom string) (banktypes
 func (MockBankKeeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
 	return sdk.Coin{
 		Denom:  "uusdc",
-		Amount: sdk.Int{},
+		Amount: math.Int{},
 	}
 }
 
@@ -86,6 +87,6 @@ func (ErrBankKeeper) GetDenomMetaData(ctx sdk.Context, denom string) (banktypes.
 func (ErrBankKeeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
 	return sdk.Coin{
 		Denom:  "uusdc",
-		Amount: sdk.Int{},
+		Amount: math.Int{},
 	}
 }

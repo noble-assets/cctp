@@ -19,12 +19,12 @@ import (
 	"fmt"
 	"strconv"
 
+	"cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +37,7 @@ func CmdDepositForBurn() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			amount, ok := math.NewIntFromString(args[0])
 			if !ok {
-				return sdkerrors.Wrapf(types.ErrInvalidAmount, "invalid amount")
+				return errors.Wrapf(types.ErrInvalidAmount, "invalid amount")
 			}
 
 			destinationDomain, err := strconv.ParseUint(args[1], types.BaseTen, types.DomainBitLen)

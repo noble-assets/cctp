@@ -16,12 +16,12 @@
 package cli
 
 import (
+	"cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +34,7 @@ func CmdUpdateMaxBurnAmountPerMessage() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			amount, ok := math.NewIntFromString(args[1])
 			if !ok {
-				return sdkerrors.Wrapf(types.ErrInvalidAmount, "invalid amount")
+				return errors.Wrapf(types.ErrInvalidAmount, "invalid amount")
 			}
 
 			clientCtx, err := client.GetClientTxContext(cmd)
