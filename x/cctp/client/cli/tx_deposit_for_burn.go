@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cli
 
 import (
 	"fmt"
 	"strconv"
 
+	"cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +38,7 @@ func CmdDepositForBurn() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			amount, ok := math.NewIntFromString(args[0])
 			if !ok {
-				return sdkerrors.Wrapf(types.ErrInvalidAmount, "invalid amount")
+				return errors.Wrapf(types.ErrInvalidAmount, "invalid amount")
 			}
 
 			destinationDomain, err := strconv.ParseUint(args[1], types.BaseTen, types.DomainBitLen)
@@ -55,13 +56,13 @@ func CmdDepositForBurn() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgDepositForBurn(
-				clientCtx.GetFromAddress().String(),
-				amount,
-				uint32(destinationDomain),
-				mintRecipient,
-				args[3],
-			)
+			msg := &types.MsgDepositForBurn{
+				From:              clientCtx.GetFromAddress().String(),
+				Amount:            amount,
+				DestinationDomain: uint32(destinationDomain),
+				MintRecipient:     mintRecipient,
+				BurnToken:         args[3],
+			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

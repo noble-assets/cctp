@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/sample"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/keeper"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -33,10 +33,10 @@ import (
  * Attester already found
  */
 func TestEnableAttesterHappyPath(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	attesterManager := sample.AccAddress()
+	attesterManager := utils.AccAddress()
 	testkeeper.SetAttesterManager(ctx, attesterManager)
 
 	message := types.MsgEnableAttester{
@@ -44,7 +44,7 @@ func TestEnableAttesterHappyPath(t *testing.T) {
 		Attester: "attester",
 	}
 
-	_, err := server.EnableAttester(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.EnableAttester(ctx, &message)
 	require.Nil(t, err)
 
 	actual, found := testkeeper.GetAttester(ctx, message.Attester)
@@ -53,41 +53,41 @@ func TestEnableAttesterHappyPath(t *testing.T) {
 }
 
 func TestEnableAttesterAuthorityNotSet(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	message := types.MsgEnableAttester{
-		From:     sample.AccAddress(),
+		From:     utils.AccAddress(),
 		Attester: "attester",
 	}
 
 	require.PanicsWithValue(t, "cctp attester manager not found in state", func() {
-		_, _ = server.EnableAttester(sdk.WrapSDKContext(ctx), &message)
+		_, _ = server.EnableAttester(ctx, &message)
 	})
 }
 
 func TestEnableAttesterInvalidAuthority(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	attesterManager := sample.AccAddress()
+	attesterManager := utils.AccAddress()
 	testkeeper.SetAttesterManager(ctx, attesterManager)
 
 	message := types.MsgEnableAttester{
-		From:     sample.AccAddress(),
+		From:     utils.AccAddress(),
 		Attester: "attester",
 	}
 
-	_, err := server.EnableAttester(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.EnableAttester(ctx, &message)
 	require.ErrorIs(t, types.ErrUnauthorized, err)
 	require.Contains(t, err.Error(), "this message sender cannot enable attesters")
 }
 
 func TestEnableAttesterAttesterAlreadyFound(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	attesterManager := sample.AccAddress()
+	attesterManager := utils.AccAddress()
 	testkeeper.SetAttesterManager(ctx, attesterManager)
 
 	existingAttester := types.Attester{Attester: "attester"}
@@ -98,7 +98,7 @@ func TestEnableAttesterAttesterAlreadyFound(t *testing.T) {
 		Attester: "attester",
 	}
 
-	_, err := server.EnableAttester(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.EnableAttester(ctx, &message)
 	require.ErrorIs(t, types.ErrAttesterAlreadyFound, err)
 	require.Contains(t, err.Error(), "this attester already exists in the store")
 }

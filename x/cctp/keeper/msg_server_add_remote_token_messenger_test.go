@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/sample"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/keeper"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )
@@ -43,10 +42,10 @@ func init() {
  */
 
 func TestAddRemoteTokenMessengerHappyPath(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	owner := sample.AccAddress()
+	owner := utils.AccAddress()
 	testkeeper.SetOwner(ctx, owner)
 
 	message := types.MsgAddRemoteTokenMessenger{
@@ -55,7 +54,7 @@ func TestAddRemoteTokenMessengerHappyPath(t *testing.T) {
 		Address:  tokenMessenger,
 	}
 
-	_, err := server.AddRemoteTokenMessenger(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.AddRemoteTokenMessenger(ctx, &message)
 	require.Nil(t, err)
 
 	actual, found := testkeeper.GetRemoteTokenMessenger(ctx, message.DomainId)
@@ -66,25 +65,25 @@ func TestAddRemoteTokenMessengerHappyPath(t *testing.T) {
 }
 
 func TestAddRemoteTokenMessengerAuthorityNotSet(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	message := types.MsgAddRemoteTokenMessenger{
-		From:     sample.AccAddress(),
+		From:     utils.AccAddress(),
 		DomainId: 0,
 		Address:  tokenMessenger,
 	}
 
 	require.PanicsWithValue(t, "cctp owner not found in state", func() {
-		_, _ = server.AddRemoteTokenMessenger(sdk.WrapSDKContext(ctx), &message)
+		_, _ = server.AddRemoteTokenMessenger(ctx, &message)
 	})
 }
 
 func TestAddRemoteTokenMessengerInvalidAuthority(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	owner := sample.AccAddress()
+	owner := utils.AccAddress()
 	testkeeper.SetOwner(ctx, owner)
 
 	message := types.MsgAddRemoteTokenMessenger{
@@ -93,16 +92,16 @@ func TestAddRemoteTokenMessengerInvalidAuthority(t *testing.T) {
 		Address:  tokenMessenger,
 	}
 
-	_, err := server.AddRemoteTokenMessenger(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.AddRemoteTokenMessenger(ctx, &message)
 	require.ErrorIs(t, types.ErrUnauthorized, err)
 	require.Contains(t, err.Error(), "this message sender cannot add remote token messengers")
 }
 
 func TestAddRemoteTokenMessengerTokenMessengerAlreadyFound(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	owner := sample.AccAddress()
+	owner := utils.AccAddress()
 	testkeeper.SetOwner(ctx, owner)
 
 	existingRemoteTokenMessenger := types.RemoteTokenMessenger{
@@ -117,16 +116,16 @@ func TestAddRemoteTokenMessengerTokenMessengerAlreadyFound(t *testing.T) {
 		Address:  tokenMessenger,
 	}
 
-	_, err := server.AddRemoteTokenMessenger(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.AddRemoteTokenMessenger(ctx, &message)
 	require.ErrorIs(t, types.ErrRemoteTokenMessengerAlreadyFound, err)
 	require.Contains(t, err.Error(), "a remote token messenger for this domain already exists")
 }
 
 func TestAddRemoteTokenMessengerInvalidAddress(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	owner := sample.AccAddress()
+	owner := utils.AccAddress()
 	testkeeper.SetOwner(ctx, owner)
 
 	message := types.MsgAddRemoteTokenMessenger{
@@ -135,6 +134,6 @@ func TestAddRemoteTokenMessengerInvalidAddress(t *testing.T) {
 		Address:  common.FromHex("0xD0C3da58f55358142b8d3e06C1C30c5C6114EFE8"),
 	}
 
-	_, err := server.AddRemoteTokenMessenger(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.AddRemoteTokenMessenger(ctx, &message)
 	require.ErrorIs(t, err, sdkerrors.ErrInvalidAddress)
 }

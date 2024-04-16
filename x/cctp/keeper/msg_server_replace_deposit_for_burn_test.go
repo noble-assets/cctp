@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
 	"cosmossdk.io/math"
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/sample"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/keeper"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -37,14 +38,14 @@ import (
  */
 
 func TestReplaceDepositForBurnHappyPath(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	paused := types.BurningAndMintingPaused{Paused: false}
 	testkeeper.SetBurningAndMintingPaused(ctx, paused)
 
 	// we encode the message sender when sending messages, so we must use an encoded message in the original message
-	sender := sample.AccAddress()
+	sender := utils.AccAddress()
 	senderEncoded := make([]byte, 32)
 	copy(senderEncoded[12:], sdk.MustAccAddressFromBech32(sender))
 
@@ -90,12 +91,12 @@ func TestReplaceDepositForBurnHappyPath(t *testing.T) {
 		NewMintRecipient:     []byte("new mint recipient90123456789012"),
 	}
 
-	_, err = server.ReplaceDepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err = server.ReplaceDepositForBurn(ctx, &msg)
 	require.Nil(t, err)
 }
 
 func TestReplaceDepositForBurnFailsWhenPaused(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	paused := types.BurningAndMintingPaused{Paused: true}
@@ -143,25 +144,25 @@ func TestReplaceDepositForBurnFailsWhenPaused(t *testing.T) {
 		NewMintRecipient:     []byte("new mint recipient90123456789012"),
 	}
 
-	_, err = server.ReplaceDepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err = server.ReplaceDepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrDepositForBurn, err)
 	require.Contains(t, err.Error(), "burning and minting are paused")
 }
 
 func TestReplaceDepositForBurnOuterMessageTooShort(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	paused := types.BurningAndMintingPaused{Paused: false}
 	testkeeper.SetBurningAndMintingPaused(ctx, paused)
 
-	_, err := server.ReplaceDepositForBurn(sdk.WrapSDKContext(ctx), &types.MsgReplaceDepositForBurn{})
+	_, err := server.ReplaceDepositForBurn(ctx, &types.MsgReplaceDepositForBurn{})
 	require.ErrorIs(t, types.ErrParsingMessage, err)
 	require.Contains(t, err.Error(), "cctp message must be at least 116 bytes, got 0: error while parsing message into bytes")
 }
 
 func TestReplaceDepositForBurnBurnMessageInvalidLength(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	paused := types.BurningAndMintingPaused{Paused: false}
@@ -200,13 +201,13 @@ func TestReplaceDepositForBurnBurnMessageInvalidLength(t *testing.T) {
 		NewMintRecipient:     []byte("new mint recipient90123456789012"),
 	}
 
-	_, err = server.ReplaceDepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err = server.ReplaceDepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrParsingBurnMessage, err)
 	require.Contains(t, err.Error(), "burn message must be 132 bytes")
 }
 
 func TestReplaceDepositForBurnInvalidSender(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	paused := types.BurningAndMintingPaused{Paused: false}
@@ -224,7 +225,7 @@ func TestReplaceDepositForBurnInvalidSender(t *testing.T) {
 	require.NoError(t, err)
 
 	// we encode the message sender when sending messages, so we must use an encoded message in the original message
-	sender := sample.AccAddress()
+	sender := utils.AccAddress()
 	senderEncoded := make([]byte, 32)
 	copy(senderEncoded[12:], sdk.MustAccAddressFromBech32(sender))
 
@@ -252,27 +253,27 @@ func TestReplaceDepositForBurnInvalidSender(t *testing.T) {
 	testkeeper.SetSignatureThreshold(ctx, types.SignatureThreshold{Amount: signatureThreshold})
 
 	msg := types.MsgReplaceDepositForBurn{
-		From:                 sample.AccAddress(), // different sender
+		From:                 utils.AccAddress(), // different sender
 		OriginalMessage:      originalMessageBytes,
 		OriginalAttestation:  originalAttestation,
 		NewDestinationCaller: []byte("new destination caller3456789012"),
 		NewMintRecipient:     []byte("new mint recipient90123456789012"),
 	}
 
-	_, err = server.ReplaceDepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err = server.ReplaceDepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrDepositForBurn, err)
 	require.Contains(t, err.Error(), "invalid sender for message")
 }
 
 func TestReplaceDepositForBurnEmptyNewMintRecipient(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	paused := types.SendingAndReceivingMessagesPaused{Paused: false}
 	testkeeper.SetSendingAndReceivingMessagesPaused(ctx, paused)
 
 	// we encode the message sender when sending messages, so we must use an encoded message in the original message
-	sender := sample.AccAddress()
+	sender := utils.AccAddress()
 	senderEncoded := make([]byte, 32)
 	copy(senderEncoded[12:], sdk.MustAccAddressFromBech32(sender))
 
@@ -318,20 +319,20 @@ func TestReplaceDepositForBurnEmptyNewMintRecipient(t *testing.T) {
 		NewMintRecipient:     make([]byte, types.MintRecipientLen),
 	}
 
-	_, err = server.ReplaceDepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err = server.ReplaceDepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrDepositForBurn, err)
 	require.Contains(t, err.Error(), "mint recipient must be nonzero")
 }
 
 func TestReplaceDepositForBurnInvalidNewMintRecipient(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	paused := types.SendingAndReceivingMessagesPaused{Paused: false}
 	testkeeper.SetSendingAndReceivingMessagesPaused(ctx, paused)
 
 	// we encode the message sender when sending messages, so we must use an encoded message in the original message
-	sender := sample.AccAddress()
+	sender := utils.AccAddress()
 	senderEncoded := make([]byte, 32)
 	copy(senderEncoded[12:], sdk.MustAccAddressFromBech32(sender))
 
@@ -377,20 +378,20 @@ func TestReplaceDepositForBurnInvalidNewMintRecipient(t *testing.T) {
 		NewMintRecipient:     []byte("INVALID RECIPIENT"),
 	}
 
-	_, err = server.ReplaceDepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err = server.ReplaceDepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrParsingBurnMessage, err)
 	require.Contains(t, err.Error(), "error parsing burn message")
 }
 
 func TestReplaceDepositForBurnIncorrectSourceID(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	paused := types.BurningAndMintingPaused{Paused: false}
 	testkeeper.SetBurningAndMintingPaused(ctx, paused)
 
 	// we encode the message sender when sending messages, so we must use an encoded message in the original message
-	sender := sample.AccAddress()
+	sender := utils.AccAddress()
 	senderEncoded := make([]byte, 32)
 	copy(senderEncoded[12:], sdk.MustAccAddressFromBech32(sender))
 
@@ -436,7 +437,7 @@ func TestReplaceDepositForBurnIncorrectSourceID(t *testing.T) {
 		NewMintRecipient:     []byte("new mint recipient90123456789012"),
 	}
 
-	_, err = server.ReplaceDepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err = server.ReplaceDepositForBurn(ctx, &msg)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "message not originally sent from this domain")
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBurningAndMintingPaused(t *testing.T) {
-	keeper, ctx := keepertest.CctpKeeper(t)
+	keeper, ctx := mocks.CctpKeeper()
 
 	paused := types.BurningAndMintingPaused{Paused: true}
 	keeper.SetBurningAndMintingPaused(ctx, paused)

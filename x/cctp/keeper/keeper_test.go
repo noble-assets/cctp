@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 )
 
 func TestLogger(t *testing.T) {
-	keeper, ctx := keepertest.CctpKeeper(t)
-	_ = keeper.Logger(ctx)
+	keeper, _ := mocks.CctpKeeper()
+	_ = keeper.Logger()
 }

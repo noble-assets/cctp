@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,55 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package types
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"cosmossdk.io/errors"
 )
 
-const TypeMsgLinkTokenPair = "link_token_pair"
-
-var _ sdk.Msg = &MsgLinkTokenPair{}
-
-func NewMsgLinkTokenPair(from string, localToken string, remoteToken []byte, remoteDomain uint32) *MsgLinkTokenPair {
-	return &MsgLinkTokenPair{
-		From:         from,
-		LocalToken:   localToken,
-		RemoteToken:  remoteToken,
-		RemoteDomain: remoteDomain,
-	}
-}
-
-func (msg *MsgLinkTokenPair) Route() string {
-	return RouterKey
-}
-
-func (msg *MsgLinkTokenPair) Type() string {
-	return TypeMsgLinkTokenPair
-}
-
-func (msg *MsgLinkTokenPair) GetSigners() []sdk.AccAddress {
-	from, err := sdk.AccAddressFromBech32(msg.From)
-	if err != nil {
-		panic(err)
-	}
-	return []sdk.AccAddress{from}
-}
-
-func (msg *MsgLinkTokenPair) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
-}
-
 func (msg *MsgLinkTokenPair) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.From)
-	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid from address: %s", err)
-	}
-
 	if len(msg.RemoteToken) != 32 {
-		return sdkerrors.Wrapf(ErrInvalidRemoteToken, "must be a byte32 array: %s", err)
+		return errors.Wrapf(ErrInvalidRemoteToken, "must be a byte32 array")
 	}
 
 	return nil

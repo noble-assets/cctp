@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
 func TestLocalDomainQuery(t *testing.T) {
-	keeper, ctx := keepertest.CctpKeeper(t)
-	goCtx := sdk.WrapSDKContext(ctx)
+	keeper, ctx := mocks.CctpKeeper()
 
-	res, err := keeper.LocalDomain(goCtx, &types.QueryLocalDomainRequest{})
+	res, err := keeper.LocalDomain(ctx, &types.QueryLocalDomainRequest{})
 
 	require.NoError(t, err)
 	require.Equal(t, res, &types.QueryLocalDomainResponse{DomainId: types.NobleDomainId})

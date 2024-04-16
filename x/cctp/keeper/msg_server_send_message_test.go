@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/sample"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/keeper"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )
@@ -34,7 +34,7 @@ import (
  * Recipient is empty
  */
 func TestSendMessageHappyPath(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	paused := types.SendingAndReceivingMessagesPaused{Paused: false}
@@ -46,13 +46,13 @@ func TestSendMessageHappyPath(t *testing.T) {
 	testkeeper.SetNextAvailableNonce(ctx, nonce)
 
 	msg := types.MsgSendMessage{
-		From:              sample.AccAddress(),
+		From:              utils.AccAddress(),
 		DestinationDomain: 3,
 		Recipient:         []byte("12345678901234567890123456789012"),
 		MessageBody:       []byte("It's not about money, it's about sending a message"),
 	}
 
-	resp, err := server.SendMessage(sdk.WrapSDKContext(ctx), &msg)
+	resp, err := server.SendMessage(ctx, &msg)
 	require.Nil(t, err)
 	require.Equal(t, nonce.Nonce, resp.Nonce)
 
@@ -62,21 +62,21 @@ func TestSendMessageHappyPath(t *testing.T) {
 }
 
 func TestSendMessageSendingAndReceivingMessagesPaused(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	paused := types.SendingAndReceivingMessagesPaused{Paused: true}
 	testkeeper.SetSendingAndReceivingMessagesPaused(ctx, paused)
 
-	_, err := server.SendMessage(sdk.WrapSDKContext(ctx), &types.MsgSendMessage{
-		From: sample.AccAddress(),
+	_, err := server.SendMessage(ctx, &types.MsgSendMessage{
+		From: utils.AccAddress(),
 	})
 	require.ErrorIs(t, types.ErrSendMessage, err)
 	require.Contains(t, err.Error(), "sending and receiving messages is paused")
 }
 
 func TestSendMessageMessageBodyTooLong(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	paused := types.SendingAndReceivingMessagesPaused{Paused: false}
@@ -91,19 +91,19 @@ func TestSendMessageMessageBodyTooLong(t *testing.T) {
 	testkeeper.SetNextAvailableNonce(ctx, nonce)
 
 	msg := types.MsgSendMessage{
-		From:              sample.AccAddress(),
+		From:              utils.AccAddress(),
 		DestinationDomain: 3,
 		Recipient:         []byte("12345678901234567890123456789012"),
 		MessageBody:       []byte("It's not about money, it's about sending a message"),
 	}
 
-	_, err := server.SendMessage(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.SendMessage(ctx, &msg)
 	require.ErrorIs(t, types.ErrSendMessage, err)
 	require.Contains(t, err.Error(), "message body exceeds max size")
 }
 
 func TestSendMessageRecipientEmpty(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	paused := types.SendingAndReceivingMessagesPaused{Paused: false}
@@ -115,26 +115,26 @@ func TestSendMessageRecipientEmpty(t *testing.T) {
 	testkeeper.SetNextAvailableNonce(ctx, nonce)
 
 	msg := types.MsgSendMessage{
-		From:              sample.AccAddress(),
+		From:              utils.AccAddress(),
 		DestinationDomain: 3,
 		Recipient:         make([]byte, types.MintRecipientLen),
 		MessageBody:       []byte("It's not about money, it's about sending a message"),
 	}
 
-	_, err := server.SendMessage(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.SendMessage(ctx, &msg)
 	require.ErrorIs(t, types.ErrSendMessage, err)
 	require.Contains(t, err.Error(), "recipient must not be nonzero")
 }
 
 func TestSendMessageRecipientInvalid(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	msg := types.MsgSendMessage{
-		From:      sample.AccAddress(),
+		From:      utils.AccAddress(),
 		Recipient: common.FromHex("0xfCE4cE85e1F74C01e0ecccd8BbC4606f83D3FC90"),
 	}
 
-	_, err := server.SendMessage(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.SendMessage(ctx, &msg)
 	require.ErrorIs(t, err, types.ErrParsingMessage)
 }

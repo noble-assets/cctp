@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
+	"github.com/circlefin/noble-cctp/x/cctp/types"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/nullify"
-	"github.com/circlefin/noble-cctp/x/cctp/types"
 )
 
 func TestMaxMessageBodySizeQuery(t *testing.T) {
@@ -56,22 +55,21 @@ func TestMaxMessageBodySizeQuery(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			keeper, ctx := keepertest.CctpKeeper(t)
-			goCtx := sdk.WrapSDKContext(ctx)
+			keeper, ctx := mocks.CctpKeeper()
 
 			if tc.set {
 				keeper.SetMaxMessageBodySize(ctx, MaxMessageBodySize)
 			}
 
-			response, err := keeper.MaxMessageBodySize(goCtx, tc.request)
+			response, err := keeper.MaxMessageBodySize(ctx, tc.request)
 
 			if tc.err != nil {
 				require.ErrorIs(t, err, tc.err)
 			} else {
 				require.NoError(t, err)
 				require.Equal(t,
-					nullify.Fill(tc.response),
-					nullify.Fill(response),
+					utils.Fill(tc.response),
+					utils.Fill(response),
 				)
 			}
 		})

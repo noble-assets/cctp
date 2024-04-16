@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 syntax = "proto3";
 
 package circle.cctp.v1;
 
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 
 option go_package = "github.com/circlefin/noble-cctp/x/cctp/types";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
+
   rpc AcceptOwner(MsgAcceptOwner) returns (MsgAcceptOwnerResponse);
   rpc AddRemoteTokenMessenger(MsgAddRemoteTokenMessenger) returns (MsgAddRemoteTokenMessengerResponse);
   rpc DepositForBurn(MsgDepositForBurn) returns (MsgDepositForBurnResponse);
@@ -52,86 +58,164 @@ service Msg {
 
 // TODO add comments
 message MsgUpdateOwner {
-  string from = 1;
-  string new_owner = 2;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/UpdateOwner";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string new_owner = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 message MsgUpdateOwnerResponse {}
 
 message MsgUpdateAttesterManager {
-  string from = 1;
-  string new_attester_manager = 2;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/UpdateAttesterManager";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string new_attester_manager = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 message MsgUpdateAttesterManagerResponse {}
 
 message MsgUpdateTokenController {
-  string from = 1;
-  string new_token_controller = 2;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/UpdateTokenController";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string new_token_controller = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 message MsgUpdateTokenControllerResponse {}
 
 message MsgUpdatePauser {
-  string from = 1;
-  string new_pauser = 2;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/UpdatePauser";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string new_pauser = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 message MsgUpdatePauserResponse {}
 
 message MsgAcceptOwner {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/AcceptOwner";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 message MsgAcceptOwnerResponse {}
 
 message MsgEnableAttester {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/EnableAttester";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string attester = 2;
 }
 
 message MsgEnableAttesterResponse {}
 
 message MsgDisableAttester {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/DisableAttester";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string attester = 2;
 }
 
 message MsgDisableAttesterResponse {}
 
 message MsgPauseBurningAndMinting {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/PauseBurningAndMinting";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 message MsgPauseBurningAndMintingResponse {}
 
 message MsgUnpauseBurningAndMinting {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/UnpauseBurningAndMinting";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 message MsgUnpauseBurningAndMintingResponse {}
 
 message MsgPauseSendingAndReceivingMessages {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/PauseSendingAndReceivingMessages";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 message MsgPauseSendingAndReceivingMessagesResponse {}
 
 message MsgUnpauseSendingAndReceivingMessages {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/UnpauseSendingAndReceivingMessages";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 message MsgUnpauseSendingAndReceivingMessagesResponse {}
 
 message MsgUpdateMaxMessageBodySize {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/UpdateMaxMessageBodySize";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint64 message_size = 2;
 }
 
 message MsgUpdateMaxMessageBodySizeResponse {}
 
 message MsgSetMaxBurnAmountPerMessage {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/SetMaxBurnAmountPerMessage";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string local_token = 2;
   string amount = 3 [
     (gogoproto.customtype) = "cosmossdk.io/math.Int",
@@ -142,7 +226,13 @@ message MsgSetMaxBurnAmountPerMessage {
 message MsgSetMaxBurnAmountPerMessageResponse {}
 
 message MsgDepositForBurn {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/DepositForBurn";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string amount = 2 [
     (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.nullable) = false
@@ -157,7 +247,13 @@ message MsgDepositForBurnResponse {
 }
 
 message MsgDepositForBurnWithCaller {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/DepositForBurnWithCaller";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string amount = 2 [
     (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.nullable) = false
@@ -173,7 +269,13 @@ message MsgDepositForBurnWithCallerResponse {
 }
 
 message MsgReplaceDepositForBurn {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/ReplaceDepositForBurn";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   bytes original_message = 2;
   bytes original_attestation = 3;
   bytes new_destination_caller = 4;
@@ -183,7 +285,13 @@ message MsgReplaceDepositForBurn {
 message MsgReplaceDepositForBurnResponse {}
 
 message MsgReceiveMessage {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/ReceiveMessage";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   bytes message = 2;
   bytes attestation = 3;
 }
@@ -193,7 +301,13 @@ message MsgReceiveMessageResponse {
 }
 
 message MsgSendMessage {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/SendMessage";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint32 destination_domain = 2;
   bytes recipient = 3;
   bytes message_body = 4;
@@ -204,7 +318,13 @@ message MsgSendMessageResponse {
 }
 
 message MsgSendMessageWithCaller {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/SendMessageWithCaller";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint32 destination_domain = 2;
   bytes recipient = 3;
   bytes message_body = 4;
@@ -216,7 +336,13 @@ message MsgSendMessageWithCallerResponse {
 }
 
 message MsgReplaceMessage {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/ReplaceMessage";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   bytes original_message = 2;
   bytes original_attestation = 3;
   bytes new_message_body = 4;
@@ -226,14 +352,26 @@ message MsgReplaceMessage {
 message MsgReplaceMessageResponse {}
 
 message MsgUpdateSignatureThreshold {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/UpdateSignatureThreshold";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint32 amount = 2;
 }
 
 message MsgUpdateSignatureThresholdResponse {}
 
 message MsgLinkTokenPair {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/LinkTokenPair";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint32 remote_domain = 2;
   bytes remote_token = 3;
   string local_token = 4;
@@ -242,7 +380,13 @@ message MsgLinkTokenPair {
 message MsgLinkTokenPairResponse {}
 
 message MsgUnlinkTokenPair {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/UnlinkTokenPair";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint32 remote_domain = 2;
   bytes remote_token = 3;
   string local_token = 4;
@@ -251,7 +395,13 @@ message MsgUnlinkTokenPair {
 message MsgUnlinkTokenPairResponse {}
 
 message MsgAddRemoteTokenMessenger {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/AddRemoteTokenMessenger";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint32 domain_id = 2;
   bytes address = 3;
 }
@@ -259,7 +409,13 @@ message MsgAddRemoteTokenMessenger {
 message MsgAddRemoteTokenMessengerResponse {}
 
 message MsgRemoveRemoteTokenMessenger {
-  string from = 1;
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name) = "circle/cctp/RemoveRemoteTokenMessenger";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   uint32 domain_id = 2;
 }
 

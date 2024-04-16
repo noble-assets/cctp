@@ -1,4 +1,4 @@
-.PHONY: proto-setup proto-format proto-lint proto-gen format lint test
+.PHONY: proto-format proto-lint proto-gen format lint test
 all: proto-all format lint test
 
 ###############################################################################
@@ -22,7 +22,8 @@ lint:
 ###                                Protobuf                                 ###
 ###############################################################################
 
-BUF_VERSION=1.27.1
+BUF_VERSION=1.30.1
+BUILDER_VERSION=0.14.0
 
 proto-all: proto-format proto-lint proto-gen
 
@@ -35,7 +36,7 @@ proto-format:
 proto-gen:
 	@echo "🤖 Generating code from protobuf..."
 	@docker run --rm --volume "$(PWD)":/workspace --workdir /workspace \
-		noble-cctp-proto sh ./proto/generate.sh
+		ghcr.io/cosmos/proto-builder:$(BUILDER_VERSION) sh ./proto/generate.sh
 	@echo "✅ Completed code generation!"
 
 proto-lint:
@@ -44,16 +45,11 @@ proto-lint:
 		bufbuild/buf:$(BUF_VERSION) lint
 	@echo "✅ Completed protobuf linting!"
 
-proto-setup:
-	@echo "🤖 Setting up protobuf environment..."
-	@docker build --rm --tag noble-cctp-proto:latest --file proto/Dockerfile .
-	@echo "✅ Setup protobuf environment!"
-
 ###############################################################################
 ###                                 Testing                                 ###
 ###############################################################################
 
 test:
-	@echo "🤖 Running tests..."
-	@go test -cover -race -v ./x/...
-	@echo "✅ Completed tests!"
+	@echo "🤖 Running unit tests..."
+	@go test -cover -coverprofile=coverage.out -race -v ./x/cctp/keeper/...
+	@echo "✅ Completed unit tests!"

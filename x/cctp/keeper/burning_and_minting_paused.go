@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper
 
 import (
-	"github.com/circlefin/noble-cctp/x/cctp/types"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
+	"context"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/store/prefix"
+	"github.com/circlefin/noble-cctp/x/cctp/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
 )
 
 // GetBurningAndMintingPaused returns BurningAndMintingPaused
-func (k Keeper) GetBurningAndMintingPaused(ctx sdk.Context) (val types.BurningAndMintingPaused, found bool) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.BurningAndMintingPausedKey))
+func (k Keeper) GetBurningAndMintingPaused(ctx context.Context) (val types.BurningAndMintingPaused, found bool) {
+	adapter := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store := prefix.NewStore(adapter, types.KeyPrefix(types.BurningAndMintingPausedKey))
 	b := store.Get(types.KeyPrefix(types.BurningAndMintingPausedKey))
 	if b == nil {
 		return val, false
@@ -35,8 +38,9 @@ func (k Keeper) GetBurningAndMintingPaused(ctx sdk.Context) (val types.BurningAn
 }
 
 // SetBurningAndMintingPaused set BurningAndMintingPaused in the store
-func (k Keeper) SetBurningAndMintingPaused(ctx sdk.Context, paused types.BurningAndMintingPaused) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.BurningAndMintingPausedKey))
+func (k Keeper) SetBurningAndMintingPaused(ctx context.Context, paused types.BurningAndMintingPaused) {
+	adapter := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store := prefix.NewStore(adapter, types.KeyPrefix(types.BurningAndMintingPausedKey))
 	b := k.cdc.MustMarshal(&paused)
 	store.Set(types.KeyPrefix(types.BurningAndMintingPausedKey), b)
 }

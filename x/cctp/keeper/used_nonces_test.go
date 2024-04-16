@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
+	"context"
 	"testing"
 
-	"github.com/circlefin/noble-cctp/testutil/nullify"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/keeper"
-
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-
 	"github.com/circlefin/noble-cctp/x/cctp/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
-func createNUsedNonces(keeper *keeper.Keeper, ctx sdk.Context, n int) []types.Nonce {
+func createNUsedNonces(keeper *keeper.Keeper, ctx context.Context, n int) []types.Nonce {
 	items := make([]types.Nonce, n)
 	for i := range items {
 		items[i].SourceDomain = uint32(i)
@@ -40,7 +39,7 @@ func createNUsedNonces(keeper *keeper.Keeper, ctx sdk.Context, n int) []types.No
 }
 
 func TestUsedNonceGet(t *testing.T) {
-	cctpKeeper, ctx := keepertest.CctpKeeper(t)
+	cctpKeeper, ctx := mocks.CctpKeeper()
 	items := createNUsedNonces(cctpKeeper, ctx, 10)
 	for _, item := range items {
 		found := cctpKeeper.GetUsedNonce(ctx, item)
@@ -49,7 +48,7 @@ func TestUsedNonceGet(t *testing.T) {
 }
 
 func TestUsedNonceGetNotFound(t *testing.T) {
-	cctpKeeper, ctx := keepertest.CctpKeeper(t)
+	cctpKeeper, ctx := mocks.CctpKeeper()
 
 	found := cctpKeeper.GetUsedNonce(ctx,
 		types.Nonce{
@@ -60,13 +59,13 @@ func TestUsedNonceGetNotFound(t *testing.T) {
 }
 
 func TestUsedNoncesGetAll(t *testing.T) {
-	cctpKeeper, ctx := keepertest.CctpKeeper(t)
+	cctpKeeper, ctx := mocks.CctpKeeper()
 	items := createNUsedNonces(cctpKeeper, ctx, 10)
 	nonce := make([]types.Nonce, len(items))
 	copy(nonce, items)
 
 	require.ElementsMatch(t,
-		nullify.Fill(nonce),
-		nullify.Fill(cctpKeeper.GetAllUsedNonces(ctx)),
+		utils.Fill(nonce),
+		utils.Fill(cctpKeeper.GetAllUsedNonces(ctx)),
 	)
 }

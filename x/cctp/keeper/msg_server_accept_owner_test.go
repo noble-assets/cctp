@@ -3,11 +3,10 @@ package keeper_test
 import (
 	"testing"
 
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/sample"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/keeper"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,19 +18,19 @@ import (
  */
 
 func TestAcceptOwnerHappyPath(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	owner := sample.AccAddress()
+	owner := utils.AccAddress()
 	testkeeper.SetOwner(ctx, owner)
-	pendingOwner := sample.AccAddress()
+	pendingOwner := utils.AccAddress()
 	testkeeper.SetPendingOwner(ctx, pendingOwner)
 
 	message := types.MsgAcceptOwner{
 		From: pendingOwner,
 	}
 
-	_, err := server.AcceptOwner(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.AcceptOwner(ctx, &message)
 	require.Nil(t, err)
 
 	newOwner := testkeeper.GetOwner(ctx)
@@ -39,10 +38,10 @@ func TestAcceptOwnerHappyPath(t *testing.T) {
 }
 
 func TestAcceptOwnerOwnerNotSet(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	pendingOwner := sample.AccAddress()
+	pendingOwner := utils.AccAddress()
 	testkeeper.SetPendingOwner(ctx, pendingOwner)
 
 	message := types.MsgAcceptOwner{
@@ -50,40 +49,40 @@ func TestAcceptOwnerOwnerNotSet(t *testing.T) {
 	}
 
 	require.Panicsf(t, func() {
-		_, _ = server.AcceptOwner(sdk.WrapSDKContext(ctx), &message)
+		_, _ = server.AcceptOwner(ctx, &message)
 	}, "cctp owner not found in state")
 }
 
 func TestAcceptOwnerPendingOwnerNotSet(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	owner := sample.AccAddress()
+	owner := utils.AccAddress()
 	testkeeper.SetOwner(ctx, owner)
 
 	message := types.MsgAcceptOwner{
-		From: sample.AccAddress(),
+		From: utils.AccAddress(),
 	}
 
-	_, err := server.AcceptOwner(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.AcceptOwner(ctx, &message)
 	require.ErrorIs(t, types.ErrUnauthorized, err)
 	require.Contains(t, err.Error(), "pending owner is not set")
 }
 
 func TestAcceptOwnerInvalidPendingOwner(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	owner := sample.AccAddress()
+	owner := utils.AccAddress()
 	testkeeper.SetOwner(ctx, owner)
-	pendingOwner := sample.AccAddress()
+	pendingOwner := utils.AccAddress()
 	testkeeper.SetPendingOwner(ctx, pendingOwner)
 
 	message := types.MsgAcceptOwner{
-		From: sample.AccAddress(),
+		From: utils.AccAddress(),
 	}
 
-	_, err := server.AcceptOwner(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.AcceptOwner(ctx, &message)
 	require.ErrorIs(t, types.ErrUnauthorized, err)
 	require.Contains(t, err.Error(), "you are not the pending owner")
 }

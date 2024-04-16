@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/store/prefix"
-
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/nullify"
+	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
@@ -31,8 +32,7 @@ import (
 )
 
 func TestUsedNonceQuerySingle(t *testing.T) {
-	keeper, ctx := keepertest.CctpKeeper(t)
-	wctx := sdk.WrapSDKContext(ctx)
+	keeper, ctx := mocks.CctpKeeper()
 	msgs := createNUsedNonces(keeper, ctx, 2)
 	for _, tc := range []struct {
 		desc     string
@@ -70,14 +70,14 @@ func TestUsedNonceQuerySingle(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			response, err := keeper.UsedNonce(wctx, tc.request)
+			response, err := keeper.UsedNonce(ctx, tc.request)
 			if tc.err != nil {
 				require.ErrorIs(t, err, tc.err)
 			} else {
 				require.NoError(t, err)
 				require.Equal(t,
-					nullify.Fill(tc.response),
-					nullify.Fill(response),
+					utils.Fill(tc.response),
+					utils.Fill(response),
 				)
 			}
 		})
@@ -85,8 +85,7 @@ func TestUsedNonceQuerySingle(t *testing.T) {
 }
 
 func TestUsedNonceQueryPaginated(t *testing.T) {
-	keeper, ctx := keepertest.CctpKeeper(t)
-	wctx := sdk.WrapSDKContext(ctx)
+	keeper, ctx := mocks.CctpKeeper()
 	msgs := createNUsedNonces(keeper, ctx, 5)
 	usedNonce := make([]types.Nonce, len(msgs))
 	copy(usedNonce, msgs)
@@ -104,12 +103,12 @@ func TestUsedNonceQueryPaginated(t *testing.T) {
 	t.Run("ByOffset", func(t *testing.T) {
 		step := 2
 		for i := 0; i < len(usedNonce); i += step {
-			resp, err := keeper.UsedNonces(wctx, request(nil, uint64(i), uint64(step), false))
+			resp, err := keeper.UsedNonces(ctx, request(nil, uint64(i), uint64(step), false))
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.UsedNonces), step)
 			require.Subset(t,
-				nullify.Fill(usedNonce),
-				nullify.Fill(resp.UsedNonces),
+				utils.Fill(usedNonce),
+				utils.Fill(resp.UsedNonces),
 			)
 		}
 	})
@@ -117,44 +116,44 @@ func TestUsedNonceQueryPaginated(t *testing.T) {
 		step := 2
 		var next []byte
 		for i := 0; i < len(usedNonce); i += step {
-			resp, err := keeper.UsedNonces(wctx, request(next, 0, uint64(step), false))
+			resp, err := keeper.UsedNonces(ctx, request(next, 0, uint64(step), false))
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.UsedNonces), step)
 			require.Subset(t,
-				nullify.Fill(usedNonce),
-				nullify.Fill(resp.UsedNonces),
+				utils.Fill(usedNonce),
+				utils.Fill(resp.UsedNonces),
 			)
 			next = resp.Pagination.NextKey
 		}
 	})
 	t.Run("Total", func(t *testing.T) {
-		resp, err := keeper.UsedNonces(wctx, request(nil, 0, 0, true))
+		resp, err := keeper.UsedNonces(ctx, request(nil, 0, 0, true))
 		require.NoError(t, err)
 		require.Equal(t, len(usedNonce), int(resp.Pagination.Total))
 		require.ElementsMatch(t,
-			nullify.Fill(usedNonce),
-			nullify.Fill(resp.UsedNonces),
+			utils.Fill(usedNonce),
+			utils.Fill(resp.UsedNonces),
 		)
 	})
 	t.Run("InvalidRequest", func(t *testing.T) {
-		_, err := keeper.UsedNonces(wctx, nil)
+		_, err := keeper.UsedNonces(ctx, nil)
 		require.ErrorIs(t, err, status.Error(codes.InvalidArgument, "invalid request"))
 	})
 	t.Run("PaginateError", func(t *testing.T) {
-		_, err := keeper.UsedNonces(wctx, request([]byte("key"), 1, 0, true))
+		_, err := keeper.UsedNonces(ctx, request([]byte("key"), 1, 0, true))
 		require.Contains(t, err.Error(), "invalid request, either offset or key is expected, got both")
 	})
 }
 
 func TestUsedNonceQueryPaginatedInvalidState(t *testing.T) {
-	storeKey := sdk.NewKVStoreKey(types.StoreKey)
-	keeper, ctx := keepertest.CctpKeeperWithKey(t, storeKey)
+	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
+	keeper, ctx := mocks.CctpKeeperWithKey(storeKey)
 
-	store := prefix.NewStore(ctx.KVStore(storeKey), types.KeyPrefix(types.UsedNonceKeyPrefix))
+	adapter := runtime.KVStoreAdapter(runtime.NewKVStoreService(storeKey).OpenKVStore(ctx))
+	store := prefix.NewStore(adapter, types.KeyPrefix(types.UsedNonceKeyPrefix))
 	store.Set(types.UsedNonceKey(0, 0), []byte("invalid"))
 
-	goCtx := sdk.WrapSDKContext(ctx)
-	_, err := keeper.UsedNonces(goCtx, &types.QueryAllUsedNoncesRequest{})
+	_, err := keeper.UsedNonces(ctx, &types.QueryAllUsedNoncesRequest{})
 
 	parsedErr, ok := status.FromError(err)
 	require.True(t, ok)

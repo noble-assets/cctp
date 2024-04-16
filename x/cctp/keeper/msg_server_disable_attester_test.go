@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/sample"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/keeper"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,10 +36,10 @@ import (
  * Fails when signature threshold is too low
  */
 func TestDisableAttesterHappyPath(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	attesterManager := sample.AccAddress()
+	attesterManager := utils.AccAddress()
 	testkeeper.SetAttesterManager(ctx, attesterManager)
 
 	existing := types.Attester{
@@ -63,7 +63,7 @@ func TestDisableAttesterHappyPath(t *testing.T) {
 		Attester: "attester",
 	}
 
-	_, err := server.DisableAttester(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.DisableAttester(ctx, &message)
 	require.Nil(t, err)
 
 	_, found := testkeeper.GetAttester(ctx, message.Attester)
@@ -71,7 +71,7 @@ func TestDisableAttesterHappyPath(t *testing.T) {
 }
 
 func TestDisableAttesterAuthorityNotSet(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	existing := types.Attester{
@@ -80,20 +80,20 @@ func TestDisableAttesterAuthorityNotSet(t *testing.T) {
 	testkeeper.SetAttester(ctx, existing)
 
 	message := types.MsgDisableAttester{
-		From:     sample.AccAddress(),
+		From:     utils.AccAddress(),
 		Attester: "attester",
 	}
 
 	require.PanicsWithValue(t, "cctp attester manager not found in state", func() {
-		_, _ = server.DisableAttester(sdk.WrapSDKContext(ctx), &message)
+		_, _ = server.DisableAttester(ctx, &message)
 	})
 }
 
 func TestDisableAttesterInvalidAuthority(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	attesterManager := sample.AccAddress()
+	attesterManager := utils.AccAddress()
 	testkeeper.SetAttesterManager(ctx, attesterManager)
 
 	existing := types.Attester{
@@ -102,20 +102,20 @@ func TestDisableAttesterInvalidAuthority(t *testing.T) {
 	testkeeper.SetAttester(ctx, existing)
 
 	message := types.MsgDisableAttester{
-		From:     sample.AccAddress(),
+		From:     utils.AccAddress(),
 		Attester: "attester",
 	}
 
-	_, err := server.DisableAttester(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.DisableAttester(ctx, &message)
 	require.ErrorIs(t, types.ErrUnauthorized, err)
 	require.Contains(t, err.Error(), "this message sender cannot disable attesters")
 }
 
 func TestDisableAttesterAttesterNotFound(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	attesterManager := sample.AccAddress()
+	attesterManager := utils.AccAddress()
 	testkeeper.SetAttesterManager(ctx, attesterManager)
 
 	message := types.MsgDisableAttester{
@@ -123,16 +123,16 @@ func TestDisableAttesterAttesterNotFound(t *testing.T) {
 		Attester: "attester",
 	}
 
-	_, err := server.DisableAttester(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.DisableAttester(ctx, &message)
 	require.ErrorIs(t, types.ErrDisableAttester, err)
 	require.Contains(t, err.Error(), "attester not found")
 }
 
 func TestDisableAttesterFailsWhenOnly1AttesterIsLeft(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	attesterManager := sample.AccAddress()
+	attesterManager := utils.AccAddress()
 	testkeeper.SetAttesterManager(ctx, attesterManager)
 
 	existing := types.Attester{
@@ -145,7 +145,7 @@ func TestDisableAttesterFailsWhenOnly1AttesterIsLeft(t *testing.T) {
 		Attester: "attester",
 	}
 
-	_, err := server.DisableAttester(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.DisableAttester(ctx, &message)
 	require.ErrorIs(t, types.ErrDisableAttester, err)
 	require.Contains(t, err.Error(), "cannot disable the last attester")
 
@@ -154,10 +154,10 @@ func TestDisableAttesterFailsWhenOnly1AttesterIsLeft(t *testing.T) {
 }
 
 func TestDisableAttesterFailsWhenSignatureThresholdNotFound(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	attesterManager := sample.AccAddress()
+	attesterManager := utils.AccAddress()
 	testkeeper.SetAttesterManager(ctx, attesterManager)
 
 	existing := types.Attester{
@@ -174,16 +174,16 @@ func TestDisableAttesterFailsWhenSignatureThresholdNotFound(t *testing.T) {
 		Attester: "attester",
 	}
 
-	_, err := server.DisableAttester(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.DisableAttester(ctx, &message)
 	require.ErrorIs(t, types.ErrDisableAttester, err)
 	require.Contains(t, err.Error(), "signature threshold not set")
 }
 
 func TestDisableAttesterFailsWhenSignatureThresholdIsTooLow(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	attesterManager := sample.AccAddress()
+	attesterManager := utils.AccAddress()
 	testkeeper.SetAttesterManager(ctx, attesterManager)
 
 	existing1 := types.Attester{
@@ -203,7 +203,7 @@ func TestDisableAttesterFailsWhenSignatureThresholdIsTooLow(t *testing.T) {
 		Attester: "attester1",
 	}
 
-	_, err := server.DisableAttester(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.DisableAttester(ctx, &message)
 	require.ErrorIs(t, types.ErrDisableAttester, err)
 	require.Contains(t, err.Error(), "signature threshold is too low")
 }

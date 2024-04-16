@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper
 
 import (
-	"github.com/circlefin/noble-cctp/x/cctp/types"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
+	"context"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/store/prefix"
+	"github.com/circlefin/noble-cctp/x/cctp/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
 )
 
 // GetRemoteTokenMessenger returns a remote token messenger
-func (k Keeper) GetRemoteTokenMessenger(ctx sdk.Context, remoteDomain uint32) (val types.RemoteTokenMessenger, found bool) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.RemoteTokenMessengerKeyPrefix))
+func (k Keeper) GetRemoteTokenMessenger(ctx context.Context, remoteDomain uint32) (val types.RemoteTokenMessenger, found bool) {
+	adapter := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store := prefix.NewStore(adapter, types.KeyPrefix(types.RemoteTokenMessengerKeyPrefix))
 
 	b := store.Get(types.RemoteTokenMessengerKey(remoteDomain))
 	if b == nil {
@@ -36,25 +39,28 @@ func (k Keeper) GetRemoteTokenMessenger(ctx sdk.Context, remoteDomain uint32) (v
 }
 
 // SetRemoteTokenMessenger sets a remote token messenger in the store
-func (k Keeper) SetRemoteTokenMessenger(ctx sdk.Context, remoteTokenMessenger types.RemoteTokenMessenger) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.RemoteTokenMessengerKeyPrefix))
+func (k Keeper) SetRemoteTokenMessenger(ctx context.Context, remoteTokenMessenger types.RemoteTokenMessenger) {
+	adapter := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store := prefix.NewStore(adapter, types.KeyPrefix(types.RemoteTokenMessengerKeyPrefix))
 	b := k.cdc.MustMarshal(&remoteTokenMessenger)
 	store.Set(types.RemoteTokenMessengerKey(remoteTokenMessenger.DomainId), b)
 }
 
 // DeleteRemoteTokenMessenger removes a remote token messenger
 func (k Keeper) DeleteRemoteTokenMessenger(
-	ctx sdk.Context,
+	ctx context.Context,
 	remoteDomain uint32,
 ) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.RemoteTokenMessengerKeyPrefix))
+	adapter := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store := prefix.NewStore(adapter, types.KeyPrefix(types.RemoteTokenMessengerKeyPrefix))
 	store.Delete(types.RemoteTokenMessengerKey(remoteDomain))
 }
 
 // GetRemoteTokenMessengers returns all remote token messengers
-func (k Keeper) GetRemoteTokenMessengers(ctx sdk.Context) (list []types.RemoteTokenMessenger) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.RemoteTokenMessengerKeyPrefix))
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+func (k Keeper) GetRemoteTokenMessengers(ctx context.Context) (list []types.RemoteTokenMessenger) {
+	adapter := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store := prefix.NewStore(adapter, types.KeyPrefix(types.RemoteTokenMessengerKeyPrefix))
+	iterator := store.Iterator(nil, nil)
 
 	defer iterator.Close()
 

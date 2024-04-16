@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cli
 
 import (
@@ -48,12 +49,12 @@ func CmdSendMessage() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgSendMessage(
-				clientCtx.GetFromAddress().String(),
-				uint32(destinationDomain),
-				recipient,
-				[]byte(args[2]),
-			)
+			msg := &types.MsgSendMessage{
+				From:              clientCtx.GetFromAddress().String(),
+				DestinationDomain: uint32(destinationDomain),
+				Recipient:         recipient,
+				MessageBody:       []byte(args[2]),
+			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

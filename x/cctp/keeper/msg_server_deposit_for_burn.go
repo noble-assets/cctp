@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper
 
 import (
@@ -92,7 +93,7 @@ func (k msgServer) depositForBurn(
 	}
 
 	// burn coins
-	coin := sdk.NewCoin(burnToken, sdk.NewIntFromBigInt(amount.BigInt()))
+	coin := sdk.NewCoin(burnToken, math.NewIntFromBigInt(amount.BigInt()))
 
 	err := k.bank.SendCoinsFromAccountToModule(ctx, sdk.MustAccAddressFromBech32(from), types.ModuleName, sdk.NewCoins(coin))
 	if err != nil {
@@ -134,7 +135,7 @@ func (k msgServer) depositForBurn(
 			MessageBody:       newMessageBodyBytes,
 		}
 
-		resp, err := k.SendMessage(sdk.WrapSDKContext(ctx), &message)
+		resp, err := k.SendMessage(ctx, &message)
 		if err != nil {
 			return 0, err
 		}
@@ -148,7 +149,7 @@ func (k msgServer) depositForBurn(
 			DestinationCaller: destinationCaller,
 		}
 
-		resp, err := k.SendMessageWithCaller(sdk.WrapSDKContext(ctx), &message)
+		resp, err := k.SendMessageWithCaller(ctx, &message)
 		if err != nil {
 			return 0, err
 		}

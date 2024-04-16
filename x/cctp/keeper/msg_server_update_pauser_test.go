@@ -3,11 +3,10 @@ package keeper_test
 import (
 	"testing"
 
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/sample"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/keeper"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,22 +17,22 @@ import (
  */
 
 func TestUpdatePauserHappyPath(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	owner := sample.AccAddress()
+	owner := utils.AccAddress()
 	testkeeper.SetOwner(ctx, owner)
-	pauser := sample.AccAddress()
+	pauser := utils.AccAddress()
 	testkeeper.SetPauser(ctx, pauser)
 
-	newPauser := sample.AccAddress()
+	newPauser := utils.AccAddress()
 
 	message := types.MsgUpdatePauser{
 		From:      owner,
 		NewPauser: newPauser,
 	}
 
-	_, err := server.UpdatePauser(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.UpdatePauser(ctx, &message)
 	require.Nil(t, err)
 
 	actual := testkeeper.GetPauser(ctx)
@@ -41,38 +40,38 @@ func TestUpdatePauserHappyPath(t *testing.T) {
 }
 
 func TestUpdatePauserAuthorityIsNotSet(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	pauser := sample.AccAddress()
+	pauser := utils.AccAddress()
 	testkeeper.SetPauser(ctx, pauser)
 
 	message := types.MsgUpdatePauser{
 		From:      "not the authority",
-		NewPauser: sample.AccAddress(),
+		NewPauser: utils.AccAddress(),
 	}
 	require.Panicsf(t, func() {
-		_, _ = server.UpdatePauser(sdk.WrapSDKContext(ctx), &message)
+		_, _ = server.UpdatePauser(ctx, &message)
 	}, "cctp owner not found in state")
 }
 
 func TestUpdatePauserInvalidAuthority(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	owner := sample.AccAddress()
+	owner := utils.AccAddress()
 	testkeeper.SetOwner(ctx, owner)
-	pauser := sample.AccAddress()
+	pauser := utils.AccAddress()
 	testkeeper.SetPauser(ctx, pauser)
 
-	newPauser := sample.AccAddress()
+	newPauser := utils.AccAddress()
 
 	message := types.MsgUpdatePauser{
-		From:      sample.AccAddress(),
+		From:      utils.AccAddress(),
 		NewPauser: newPauser,
 	}
 
-	_, err := server.UpdatePauser(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.UpdatePauser(ctx, &message)
 	require.ErrorIs(t, types.ErrUnauthorized, err)
 	require.Contains(t, err.Error(), "this message sender cannot update the pauser")
 }

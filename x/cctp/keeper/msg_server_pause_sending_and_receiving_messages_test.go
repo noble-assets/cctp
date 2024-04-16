@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/sample"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
+
 	"github.com/circlefin/noble-cctp/x/cctp/keeper"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -32,16 +33,16 @@ import (
  * Invalid authority
  */
 func TestPauseSendingAndReceivingMessagesHappyPath(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	pauser := sample.AccAddress()
+	pauser := utils.AccAddress()
 	testkeeper.SetPauser(ctx, pauser)
 
 	message := types.MsgPauseSendingAndReceivingMessages{
 		From: pauser,
 	}
-	_, err := server.PauseSendingAndReceivingMessages(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.PauseSendingAndReceivingMessages(ctx, &message)
 	require.Nil(t, err)
 
 	actual, found := testkeeper.GetSendingAndReceivingMessagesPaused(ctx)
@@ -50,7 +51,7 @@ func TestPauseSendingAndReceivingMessagesHappyPath(t *testing.T) {
 }
 
 func TestPauseSendingAndReceivingMessagesAuthorityNotSet(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	message := types.MsgPauseSendingAndReceivingMessages{
@@ -58,21 +59,21 @@ func TestPauseSendingAndReceivingMessagesAuthorityNotSet(t *testing.T) {
 	}
 
 	require.PanicsWithValue(t, "cctp pauser not found in state", func() {
-		_, _ = server.PauseSendingAndReceivingMessages(sdk.WrapSDKContext(ctx), &message)
+		_, _ = server.PauseSendingAndReceivingMessages(ctx, &message)
 	})
 }
 
 func TestPauseSendingAndReceivingMessagesInvalidAuthority(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	pauser := sample.AccAddress()
+	pauser := utils.AccAddress()
 	testkeeper.SetPauser(ctx, pauser)
 
 	message := types.MsgPauseSendingAndReceivingMessages{
 		From: "not the authority",
 	}
-	_, err := server.PauseSendingAndReceivingMessages(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.PauseSendingAndReceivingMessages(ctx, &message)
 	require.ErrorIs(t, types.ErrUnauthorized, err)
 	require.Contains(t, err.Error(), "this message sender cannot pause sending and receiving")
 }

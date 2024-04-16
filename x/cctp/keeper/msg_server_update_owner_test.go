@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/sample"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/keeper"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -33,17 +33,17 @@ import (
  */
 
 func TestUpdateAuthorityHappyPath(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	owner := sample.AccAddress()
+	owner := utils.AccAddress()
 	testkeeper.SetOwner(ctx, owner)
 
 	message := types.MsgUpdateOwner{
 		From:     owner,
 		NewOwner: "new address",
 	}
-	_, err := server.UpdateOwner(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.UpdateOwner(ctx, &message)
 	require.Nil(t, err)
 
 	actual, found := testkeeper.GetPendingOwner(ctx)
@@ -52,31 +52,31 @@ func TestUpdateAuthorityHappyPath(t *testing.T) {
 }
 
 func TestUpdateAuthorityAuthorityNotSet(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	message := types.MsgUpdateOwner{
-		From:     sample.AccAddress(),
+		From:     utils.AccAddress(),
 		NewOwner: "new address",
 	}
 
 	require.PanicsWithValue(t, "cctp owner not found in state", func() {
-		_, _ = server.UpdateOwner(sdk.WrapSDKContext(ctx), &message)
+		_, _ = server.UpdateOwner(ctx, &message)
 	})
 }
 
 func TestUpdateAuthorityInvalidAuthority(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	owner := sample.AccAddress()
+	owner := utils.AccAddress()
 	testkeeper.SetOwner(ctx, owner)
 
 	message := types.MsgUpdateOwner{
 		From:     "not the authority",
 		NewOwner: "new address",
 	}
-	_, err := server.UpdateOwner(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.UpdateOwner(ctx, &message)
 	require.ErrorIs(t, types.ErrUnauthorized, err)
 	require.Contains(t, err.Error(), "this message sender cannot update the authority")
 }

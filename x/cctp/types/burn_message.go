@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package types
 
 import (
 	"encoding/binary"
 	"math/big"
 
+	"cosmossdk.io/errors"
 	"cosmossdk.io/math"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // Parse parses a byte array into a BurnMessage struct
 // https://developers.circle.com/stablecoin/docs/cctp-technical-reference#burnmessage
 func (msg *BurnMessage) Parse(bz []byte) (*BurnMessage, error) {
 	if len(bz) != BurnMessageLen {
-		return nil, sdkerrors.Wrapf(ErrParsingBurnMessage, "burn message must be %d bytes, got %d", BurnMessageLen, len(msg.BurnToken))
+		return nil, errors.Wrapf(ErrParsingBurnMessage, "burn message must be %d bytes, got %d", BurnMessageLen, len(msg.BurnToken))
 	}
 
 	msg.Version = binary.BigEndian.Uint32(bz[BurnMsgVersionIndex:BurnTokenIndex])
@@ -43,13 +44,13 @@ func (msg *BurnMessage) Parse(bz []byte) (*BurnMessage, error) {
 // burn token, mint recipient, and message sender must be 32 bytes
 func (msg *BurnMessage) Bytes() ([]byte, error) {
 	if len(msg.BurnToken) != BurnTokenLen {
-		return nil, sdkerrors.Wrapf(ErrParsingBurnMessage, "burn token must be 32 bytes, got %d", len(msg.BurnToken))
+		return nil, errors.Wrapf(ErrParsingBurnMessage, "burn token must be 32 bytes, got %d", len(msg.BurnToken))
 	}
 	if len(msg.MintRecipient) != MintRecipientLen {
-		return nil, sdkerrors.Wrapf(ErrParsingBurnMessage, "mint recipient must be 32 bytes, got %d", len(msg.MintRecipient))
+		return nil, errors.Wrapf(ErrParsingBurnMessage, "mint recipient must be 32 bytes, got %d", len(msg.MintRecipient))
 	}
 	if len(msg.MessageSender) != AddressBytesLen {
-		return nil, sdkerrors.Wrapf(ErrParsingBurnMessage, "message sender must be 32 bytes, got %d", len(msg.MessageSender))
+		return nil, errors.Wrapf(ErrParsingBurnMessage, "message sender must be 32 bytes, got %d", len(msg.MessageSender))
 	}
 
 	result := make([]byte, BurnMessageLen)

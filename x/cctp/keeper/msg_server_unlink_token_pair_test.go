@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/sample"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/keeper"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -33,10 +33,10 @@ import (
  * Token pair not found
  */
 func TestUnlinkTokenPairHappyPath(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	tokenController := sample.AccAddress()
+	tokenController := utils.AccAddress()
 	testkeeper.SetTokenController(ctx, tokenController)
 
 	tokenPair := types.TokenPair{
@@ -53,7 +53,7 @@ func TestUnlinkTokenPairHappyPath(t *testing.T) {
 		LocalToken:   tokenPair.LocalToken,
 	}
 
-	_, err := server.UnlinkTokenPair(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.UnlinkTokenPair(ctx, &message)
 	require.Nil(t, err)
 
 	_, found := testkeeper.GetTokenPair(ctx, message.RemoteDomain, message.RemoteToken)
@@ -61,26 +61,26 @@ func TestUnlinkTokenPairHappyPath(t *testing.T) {
 }
 
 func TestUnlinkTokenPairAuthorityNotSet(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	message := types.MsgUnlinkTokenPair{
-		From:         sample.AccAddress(),
+		From:         utils.AccAddress(),
 		RemoteDomain: 0,
 		RemoteToken:  token,
 		LocalToken:   "uusdc",
 	}
 
 	require.PanicsWithValue(t, "cctp token controller not found in state", func() {
-		_, _ = server.UnlinkTokenPair(sdk.WrapSDKContext(ctx), &message)
+		_, _ = server.UnlinkTokenPair(ctx, &message)
 	})
 }
 
 func TestUnlinkTokenPairInvalidAuthority(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	tokenController := sample.AccAddress()
+	tokenController := utils.AccAddress()
 	testkeeper.SetTokenController(ctx, tokenController)
 
 	message := types.MsgUnlinkTokenPair{
@@ -90,16 +90,16 @@ func TestUnlinkTokenPairInvalidAuthority(t *testing.T) {
 		LocalToken:   "uusdc",
 	}
 
-	_, err := server.UnlinkTokenPair(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.UnlinkTokenPair(ctx, &message)
 	require.ErrorIs(t, types.ErrUnauthorized, err)
 	require.Contains(t, err.Error(), "this message sender cannot unlink token pairs")
 }
 
 func TestUnlinkTokenPairTokenPairNotFound(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
-	tokenController := sample.AccAddress()
+	tokenController := utils.AccAddress()
 	testkeeper.SetTokenController(ctx, tokenController)
 
 	message := types.MsgUnlinkTokenPair{
@@ -109,7 +109,7 @@ func TestUnlinkTokenPairTokenPairNotFound(t *testing.T) {
 		LocalToken:   "uusdc",
 	}
 
-	_, err := server.UnlinkTokenPair(sdk.WrapSDKContext(ctx), &message)
+	_, err := server.UnlinkTokenPair(ctx, &message)
 	require.ErrorIs(t, types.ErrTokenPairNotFound, err)
 	require.Contains(t, err.Error(), "token pair doesn't exist in store")
 }

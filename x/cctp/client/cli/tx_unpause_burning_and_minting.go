@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cli
 
 import (
@@ -35,9 +36,9 @@ func CmdUnpauseBurningAndMinting() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgUnpauseBurningAndMinting(
-				clientCtx.GetFromAddress().String(),
-			)
+			msg := &types.MsgUnpauseBurningAndMinting{
+				From: clientCtx.GetFromAddress().String(),
+			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/store/prefix"
-
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
+	"github.com/circlefin/noble-cctp/x/cctp/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	"github.com/cosmos/cosmos-sdk/types/query"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	"github.com/stretchr/testify/require"
-
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/nullify"
-	"github.com/circlefin/noble-cctp/x/cctp/types"
 )
 
 func TestPerMessageBurnLimitQuery(t *testing.T) {
@@ -64,22 +63,21 @@ func TestPerMessageBurnLimitQuery(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			keeper, ctx := keepertest.CctpKeeper(t)
-			goCtx := sdk.WrapSDKContext(ctx)
+			keeper, ctx := mocks.CctpKeeper()
 
 			if tc.set {
 				keeper.SetPerMessageBurnLimit(ctx, PerMessageBurnLimit)
 			}
 
-			response, err := keeper.PerMessageBurnLimit(goCtx, tc.request)
+			response, err := keeper.PerMessageBurnLimit(ctx, tc.request)
 
 			if tc.err != nil {
 				require.ErrorIs(t, err, tc.err)
 			} else {
 				require.NoError(t, err)
 				require.Equal(t,
-					nullify.Fill(tc.response),
-					nullify.Fill(response),
+					utils.Fill(tc.response),
+					utils.Fill(response),
 				)
 			}
 		})
@@ -87,8 +85,7 @@ func TestPerMessageBurnLimitQuery(t *testing.T) {
 }
 
 func TestPerMessageBurnLimitQueryPaginated(t *testing.T) {
-	keeper, ctx := keepertest.CctpKeeper(t)
-	wctx := sdk.WrapSDKContext(ctx)
+	keeper, ctx := mocks.CctpKeeper()
 	msgs := createNPerMessageBurnLimits(keeper, ctx, 5)
 	perMessageBurnLimits := make([]types.PerMessageBurnLimit, len(msgs))
 	copy(perMessageBurnLimits, msgs)
@@ -106,12 +103,12 @@ func TestPerMessageBurnLimitQueryPaginated(t *testing.T) {
 	t.Run("ByOffset", func(t *testing.T) {
 		step := 2
 		for i := 0; i < len(perMessageBurnLimits); i += step {
-			resp, err := keeper.PerMessageBurnLimits(wctx, request(nil, uint64(i), uint64(step), false))
+			resp, err := keeper.PerMessageBurnLimits(ctx, request(nil, uint64(i), uint64(step), false))
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.BurnLimits), step)
 			require.Subset(t,
-				nullify.Fill(perMessageBurnLimits),
-				nullify.Fill(resp.BurnLimits),
+				utils.Fill(perMessageBurnLimits),
+				utils.Fill(resp.BurnLimits),
 			)
 		}
 	})
@@ -119,44 +116,44 @@ func TestPerMessageBurnLimitQueryPaginated(t *testing.T) {
 		step := 2
 		var next []byte
 		for i := 0; i < len(perMessageBurnLimits); i += step {
-			resp, err := keeper.PerMessageBurnLimits(wctx, request(next, 0, uint64(step), false))
+			resp, err := keeper.PerMessageBurnLimits(ctx, request(next, 0, uint64(step), false))
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.BurnLimits), step)
 			require.Subset(t,
-				nullify.Fill(perMessageBurnLimits),
-				nullify.Fill(resp.BurnLimits),
+				utils.Fill(perMessageBurnLimits),
+				utils.Fill(resp.BurnLimits),
 			)
 			next = resp.Pagination.NextKey
 		}
 	})
 	t.Run("Total", func(t *testing.T) {
-		resp, err := keeper.PerMessageBurnLimits(wctx, request(nil, 0, 0, true))
+		resp, err := keeper.PerMessageBurnLimits(ctx, request(nil, 0, 0, true))
 		require.NoError(t, err)
 		require.Equal(t, len(perMessageBurnLimits), int(resp.Pagination.Total))
 		require.ElementsMatch(t,
-			nullify.Fill(perMessageBurnLimits),
-			nullify.Fill(resp.BurnLimits),
+			utils.Fill(perMessageBurnLimits),
+			utils.Fill(resp.BurnLimits),
 		)
 	})
 	t.Run("InvalidRequest", func(t *testing.T) {
-		_, err := keeper.PerMessageBurnLimits(wctx, nil)
+		_, err := keeper.PerMessageBurnLimits(ctx, nil)
 		require.ErrorIs(t, err, status.Error(codes.InvalidArgument, "invalid request"))
 	})
 	t.Run("PaginateError", func(t *testing.T) {
-		_, err := keeper.PerMessageBurnLimits(wctx, request([]byte("key"), 1, 0, true))
+		_, err := keeper.PerMessageBurnLimits(ctx, request([]byte("key"), 1, 0, true))
 		require.Contains(t, err.Error(), "invalid request, either offset or key is expected, got both")
 	})
 }
 
 func TestPerMessageBurnLimitQueryPaginatedInvalidState(t *testing.T) {
-	storeKey := sdk.NewKVStoreKey(types.StoreKey)
-	keeper, ctx := keepertest.CctpKeeperWithKey(t, storeKey)
+	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
+	keeper, ctx := mocks.CctpKeeperWithKey(storeKey)
 
-	store := prefix.NewStore(ctx.KVStore(storeKey), types.KeyPrefix(types.PerMessageBurnLimitKeyPrefix))
+	adapter := runtime.KVStoreAdapter(runtime.NewKVStoreService(storeKey).OpenKVStore(ctx))
+	store := prefix.NewStore(adapter, types.KeyPrefix(types.PerMessageBurnLimitKeyPrefix))
 	store.Set(types.KeyPrefix(string(types.PerMessageBurnLimitKey("denom"))), []byte("invalid"))
 
-	goCtx := sdk.WrapSDKContext(ctx)
-	_, err := keeper.PerMessageBurnLimits(goCtx, &types.QueryAllPerMessageBurnLimitsRequest{})
+	_, err := keeper.PerMessageBurnLimits(ctx, &types.QueryAllPerMessageBurnLimitsRequest{})
 
 	parsedErr, ok := status.FromError(err)
 	require.True(t, ok)

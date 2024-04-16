@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cli
 
 import (
@@ -35,13 +36,13 @@ func CmdReplaceDepositForBurn() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgReplaceDepositForBurn(
-				clientCtx.GetFromAddress().String(),
-				[]byte(args[0]),
-				[]byte(args[1]),
-				[]byte(args[2]),
-				[]byte(args[3]),
-			)
+			msg := &types.MsgReplaceDepositForBurn{
+				From:                 clientCtx.GetFromAddress().String(),
+				OriginalMessage:      []byte(args[0]),
+				OriginalAttestation:  []byte(args[1]),
+				NewDestinationCaller: []byte(args[2]),
+				NewMintRecipient:     []byte(args[3]),
+			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

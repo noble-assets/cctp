@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
+	"context"
 	"strconv"
 	"testing"
 
 	"cosmossdk.io/math"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/keeper"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/stretchr/testify/require"
-
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/nullify"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
+	"github.com/stretchr/testify/require"
 )
 
-func createNPerMessageBurnLimits(keeper *keeper.Keeper, ctx sdk.Context, n int) []types.PerMessageBurnLimit {
+func createNPerMessageBurnLimits(keeper *keeper.Keeper, ctx context.Context, n int) []types.PerMessageBurnLimit {
 	items := make([]types.PerMessageBurnLimit, n)
 	for i := range items {
 		items[i].Denom = "amount" + strconv.Itoa(i)
@@ -42,7 +40,7 @@ func createNPerMessageBurnLimits(keeper *keeper.Keeper, ctx sdk.Context, n int) 
 }
 
 func TestPerMessageBurnLimit(t *testing.T) {
-	keeper, ctx := keepertest.CctpKeeper(t)
+	keeper, ctx := mocks.CctpKeeper()
 
 	_, found := keeper.GetPerMessageBurnLimit(ctx, "usdc")
 	require.False(t, found)
@@ -57,7 +55,7 @@ func TestPerMessageBurnLimit(t *testing.T) {
 	require.True(t, found)
 	require.Equal(t,
 		perMessageBurnLimit,
-		nullify.Fill(&limit),
+		utils.Fill(&limit),
 	)
 
 	newPerMessageBurnLimit := types.PerMessageBurnLimit{
@@ -71,7 +69,7 @@ func TestPerMessageBurnLimit(t *testing.T) {
 	require.True(t, found)
 	require.Equal(t,
 		newPerMessageBurnLimit,
-		nullify.Fill(&limit),
+		utils.Fill(&limit),
 	)
 
 	separateCurrencyPerMessageBurnLimit := types.PerMessageBurnLimit{
@@ -84,18 +82,18 @@ func TestPerMessageBurnLimit(t *testing.T) {
 	require.True(t, found)
 	require.Equal(t,
 		separateCurrencyPerMessageBurnLimit,
-		nullify.Fill(&limit),
+		utils.Fill(&limit),
 	)
 }
 
 func TestPerMessageBurnLimitsGetAll(t *testing.T) {
-	cctpKeeper, ctx := keepertest.CctpKeeper(t)
+	cctpKeeper, ctx := mocks.CctpKeeper()
 	items := createNPerMessageBurnLimits(cctpKeeper, ctx, 10)
 	denom := make([]types.PerMessageBurnLimit, len(items))
 	copy(denom, items)
 
 	require.ElementsMatch(t,
-		nullify.Fill(denom),
-		nullify.Fill(cctpKeeper.GetAllPerMessageBurnLimits(ctx)),
+		utils.Fill(denom),
+		utils.Fill(cctpKeeper.GetAllPerMessageBurnLimits(ctx)),
 	)
 }

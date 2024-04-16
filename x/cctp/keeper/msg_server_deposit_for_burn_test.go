@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper_test
 
 import (
 	"testing"
 
 	"cosmossdk.io/math"
-	keepertest "github.com/circlefin/noble-cctp/testutil/keeper"
-	"github.com/circlefin/noble-cctp/testutil/sample"
+	"github.com/circlefin/noble-cctp/utils"
+	"github.com/circlefin/noble-cctp/utils/mocks"
 	"github.com/circlefin/noble-cctp/x/cctp/keeper"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
-	fiattokenfactorytypes "github.com/circlefin/noble-fiattokenfactory/x/fiattokenfactory/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )
@@ -43,8 +42,7 @@ import (
  */
 
 func TestDepositForBurnHappyPath(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
-	fiatfkeeper, fiatfctx := keepertest.FiatTokenfactoryKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	startingNonce := types.Nonce{Nonce: 1}
@@ -56,8 +54,6 @@ func TestDepositForBurnHappyPath(t *testing.T) {
 	}
 	testkeeper.SetRemoteTokenMessenger(ctx, remoteTokenMessenger)
 
-	fiatfkeeper.SetMintingDenom(fiatfctx, fiattokenfactorytypes.MintingDenom{Denom: "uUsDC"})
-
 	perMessageBurnLimit := types.PerMessageBurnLimit{
 		Denom:  "uusdc",
 		Amount: math.NewInt(800000),
@@ -65,13 +61,13 @@ func TestDepositForBurnHappyPath(t *testing.T) {
 	testkeeper.SetPerMessageBurnLimit(ctx, perMessageBurnLimit)
 
 	msg := types.MsgDepositForBurn{
-		From:              sample.AccAddress(),
+		From:              utils.AccAddress(),
 		Amount:            math.NewInt(531),
 		DestinationDomain: 0,
 		MintRecipient:     []byte("12345678901234567890123456789012"),
 		BurnToken:         "uUsDC",
 	}
-	resp, err := server.DepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	resp, err := server.DepositForBurn(ctx, &msg)
 	require.Nil(t, err)
 	require.Equal(t, startingNonce.Nonce, resp.Nonce)
 
@@ -81,7 +77,7 @@ func TestDepositForBurnHappyPath(t *testing.T) {
 }
 
 func TestDepositForBurnZeroAmount(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	msg := types.MsgDepositForBurn{
@@ -91,13 +87,13 @@ func TestDepositForBurnZeroAmount(t *testing.T) {
 		MintRecipient:     []byte("12345678901234567890123456789012"),
 		BurnToken:         "uUsDC",
 	}
-	_, err := server.DepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.DepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrDepositForBurn, err)
 	require.Contains(t, err.Error(), "amount must be positive")
 }
 
 func TestDepositForBurnNegativeAmount(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	msg := types.MsgDepositForBurn{
@@ -107,13 +103,13 @@ func TestDepositForBurnNegativeAmount(t *testing.T) {
 		MintRecipient:     []byte("12345678901234567890123456789012"),
 		BurnToken:         "uUsDC",
 	}
-	_, err := server.DepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.DepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrDepositForBurn, err)
 	require.Contains(t, err.Error(), "amount must be positive")
 }
 
 func TestDepositForBurnEmptyMintRecipient(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	msg := types.MsgDepositForBurn{
@@ -123,13 +119,13 @@ func TestDepositForBurnEmptyMintRecipient(t *testing.T) {
 		MintRecipient:     make([]byte, types.MintRecipientLen),
 		BurnToken:         "uUsDC",
 	}
-	_, err := server.DepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.DepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrDepositForBurn, err)
 	require.Contains(t, err.Error(), "mint recipient must be nonzero")
 }
 
 func TestDepositForBurnNilMintRecipient(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	msg := types.MsgDepositForBurn{
@@ -138,13 +134,13 @@ func TestDepositForBurnNilMintRecipient(t *testing.T) {
 		DestinationDomain: 0,
 		BurnToken:         "uUsDC",
 	}
-	_, err := server.DepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.DepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrDepositForBurn, err)
 	require.Contains(t, err.Error(), "mint recipient must be nonzero")
 }
 
 func TestDepositForBurnTokenMessengerNotFound(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	startingNonce := types.Nonce{Nonce: 1}
@@ -157,13 +153,13 @@ func TestDepositForBurnTokenMessengerNotFound(t *testing.T) {
 		MintRecipient:     []byte("12345678901234567890123456789012"),
 		BurnToken:         "uusdc",
 	}
-	_, err := server.DepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.DepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrDepositForBurn, err)
 	require.Contains(t, err.Error(), "unable to look up destination token messenger")
 }
 
 func TestDepositForBurnMintingDenomNotFound(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	startingNonce := types.Nonce{Nonce: 1}
@@ -183,13 +179,13 @@ func TestDepositForBurnMintingDenomNotFound(t *testing.T) {
 		BurnToken:         "not usdc",
 	}
 
-	_, err := server.DepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.DepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrBurn, err)
 	require.Contains(t, err.Error(), "is not supported")
 }
 
 func TestDepositForBurnBurningAndMintingIsPaused(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	startingNonce := types.Nonce{Nonce: 1}
@@ -211,13 +207,13 @@ func TestDepositForBurnBurningAndMintingIsPaused(t *testing.T) {
 		BurnToken:         "uusdc",
 	}
 
-	_, err := server.DepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.DepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrBurn, err)
 	require.Contains(t, err.Error(), "burning and minting are paused")
 }
 
 func TestDepositForBurnAmountIsGreaterThanPerMessageBurnLimit(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	startingNonce := types.Nonce{Nonce: 1}
@@ -243,14 +239,13 @@ func TestDepositForBurnAmountIsGreaterThanPerMessageBurnLimit(t *testing.T) {
 		BurnToken:         "uusdc",
 	}
 
-	_, err := server.DepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.DepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrBurn, err)
 	require.Contains(t, err.Error(), "cannot burn more than the maximum per message burn limit")
 }
 
 func TestDepositForBurnBurnFails(t *testing.T) {
-	testkeeper, ctx := keepertest.ErrCctpKeeper(t)
-	fiattfkeeper, fiattfctx := keepertest.ErrFiatTokenfactoryKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeperWithErrFTF()
 
 	server := keeper.NewMsgServerImpl(testkeeper)
 
@@ -262,7 +257,6 @@ func TestDepositForBurnBurnFails(t *testing.T) {
 		Address:  tokenMessenger,
 	}
 	testkeeper.SetRemoteTokenMessenger(ctx, remoteTokenMessenger)
-	fiattfkeeper.SetMintingDenom(fiattfctx, fiattokenfactorytypes.MintingDenom{Denom: "uUsDC"})
 
 	perMessageBurnLimit := types.PerMessageBurnLimit{
 		Denom:  "uusdc",
@@ -271,18 +265,18 @@ func TestDepositForBurnBurnFails(t *testing.T) {
 	testkeeper.SetPerMessageBurnLimit(ctx, perMessageBurnLimit)
 
 	msg := types.MsgDepositForBurn{
-		From:              sample.AccAddress(),
+		From:              utils.AccAddress(),
 		Amount:            math.NewInt(531),
 		DestinationDomain: 0,
 		MintRecipient:     []byte("12345678901234567890123456789012"),
 		BurnToken:         "uUsDC",
 	}
-	_, err := server.DepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.DepositForBurn(ctx, &msg)
 	require.Contains(t, err.Error(), "tokens can not be burned")
 }
 
 func TestDepositForBurnTransferFails(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeperWithErrBank(t)
+	testkeeper, ctx := mocks.CctpKeeperWithErrBank()
 	server := keeper.NewMsgServerImpl(testkeeper)
 
 	remoteTokenMessenger := types.RemoteTokenMessenger{
@@ -298,20 +292,19 @@ func TestDepositForBurnTransferFails(t *testing.T) {
 	testkeeper.SetPerMessageBurnLimit(ctx, perMessageBurnLimit)
 
 	msg := types.MsgDepositForBurn{
-		From:              sample.AccAddress(),
+		From:              utils.AccAddress(),
 		Amount:            math.NewInt(42),
 		DestinationDomain: 0,
 		MintRecipient:     []byte("12345678901234567890123456789012"),
 		BurnToken:         "uusdc",
 	}
 
-	_, err := server.DepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.DepositForBurn(ctx, &msg)
 	require.ErrorContains(t, err, "error during transfer: intentional error")
 }
 
 func TestDepositForBurnMessageFormatFails(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
-	fiatfkeeper, fiatfctx := keepertest.FiatTokenfactoryKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 
 	server := keeper.NewMsgServerImpl(testkeeper)
 
@@ -323,7 +316,6 @@ func TestDepositForBurnMessageFormatFails(t *testing.T) {
 		Address:  tokenMessenger,
 	}
 	testkeeper.SetRemoteTokenMessenger(ctx, remoteTokenMessenger)
-	fiatfkeeper.SetMintingDenom(fiatfctx, fiattokenfactorytypes.MintingDenom{Denom: "uUsDC"})
 
 	perMessageBurnLimit := types.PerMessageBurnLimit{
 		Denom:  "uusdc",
@@ -332,20 +324,19 @@ func TestDepositForBurnMessageFormatFails(t *testing.T) {
 	testkeeper.SetPerMessageBurnLimit(ctx, perMessageBurnLimit)
 
 	msg := types.MsgDepositForBurn{
-		From:              sample.AccAddress(),
+		From:              utils.AccAddress(),
 		Amount:            math.NewInt(531),
 		DestinationDomain: 0,
 		MintRecipient:     common.FromHex("0xfCE4cE85e1F74C01e0ecccd8BbC4606f83D3FC90"),
 		BurnToken:         "uUsDC",
 	}
 
-	_, err := server.DepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.DepositForBurn(ctx, &msg)
 	require.ErrorIs(t, err, types.ErrParsingBurnMessage)
 }
 
 func TestDepositForBurnSendMessageFails(t *testing.T) {
-	testkeeper, ctx := keepertest.CctpKeeper(t)
-	fiatfkeeper, fiatfctx := keepertest.FiatTokenfactoryKeeper(t)
+	testkeeper, ctx := mocks.CctpKeeper()
 
 	server := keeper.NewMsgServerImpl(testkeeper)
 
@@ -357,8 +348,6 @@ func TestDepositForBurnSendMessageFails(t *testing.T) {
 		Address:  tokenMessenger,
 	}
 	testkeeper.SetRemoteTokenMessenger(ctx, remoteTokenMessenger)
-
-	fiatfkeeper.SetMintingDenom(fiatfctx, fiattokenfactorytypes.MintingDenom{Denom: "uUsDC"})
 
 	perMessageBurnLimit := types.PerMessageBurnLimit{
 		Denom:  "uusdc",
@@ -369,13 +358,13 @@ func TestDepositForBurnSendMessageFails(t *testing.T) {
 	testkeeper.SetSendingAndReceivingMessagesPaused(ctx, types.SendingAndReceivingMessagesPaused{Paused: true})
 
 	msg := types.MsgDepositForBurn{
-		From:              sample.AccAddress(),
+		From:              utils.AccAddress(),
 		Amount:            math.NewInt(531),
 		DestinationDomain: 0,
 		MintRecipient:     []byte("12345678901234567890123456789012"),
 		BurnToken:         "uUsDC",
 	}
 
-	_, err := server.DepositForBurn(sdk.WrapSDKContext(ctx), &msg)
+	_, err := server.DepositForBurn(ctx, &msg)
 	require.ErrorIs(t, types.ErrSendMessage, err)
 }

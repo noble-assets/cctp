@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, © Circle Internet Financial, LTD.
+ * Copyright (c) 2024, © Circle Internet Financial, LTD.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package keeper
 
 import (
 	"context"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
+	"cosmossdk.io/errors"
 	"github.com/circlefin/noble-cctp/x/cctp/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func (k msgServer) UnlinkTokenPair(goCtx context.Context, msg *types.MsgUnlinkTokenPair) (*types.MsgUnlinkTokenPairResponse, error) {
@@ -29,12 +29,12 @@ func (k msgServer) UnlinkTokenPair(goCtx context.Context, msg *types.MsgUnlinkTo
 
 	tokenController := k.GetTokenController(ctx)
 	if tokenController != msg.From {
-		return nil, sdkerrors.Wrap(types.ErrUnauthorized, "this message sender cannot unlink token pairs")
+		return nil, errors.Wrap(types.ErrUnauthorized, "this message sender cannot unlink token pairs")
 	}
 
 	tokenPair, found := k.GetTokenPair(ctx, msg.RemoteDomain, msg.RemoteToken)
 	if !found {
-		return nil, sdkerrors.Wrap(types.ErrTokenPairNotFound, "token pair doesn't exist in store")
+		return nil, errors.Wrap(types.ErrTokenPairNotFound, "token pair doesn't exist in store")
 	}
 
 	k.DeleteTokenPair(ctx, msg.RemoteDomain, tokenPair.RemoteToken)
