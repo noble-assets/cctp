@@ -57,8 +57,10 @@ func (k Keeper) GetAllPerMessageBurnLimits(ctx context.Context) (list []types.Pe
 
 	for ; iterator.Valid(); iterator.Next() {
 		var val types.PerMessageBurnLimit
-		k.cdc.MustUnmarshal(iterator.Value(), &val)
-		list = append(list, val)
+		err := k.cdc.Unmarshal(iterator.Value(), &val)
+		if err == nil {
+			list = append(list, val)
+		}
 	}
 
 	return
